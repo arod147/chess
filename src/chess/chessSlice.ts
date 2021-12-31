@@ -142,6 +142,7 @@ export const chessSlice = createSlice({
         const legalMoves = new Piece().legalMoves(state.board, state.selectedPieceLocation, state.selectedPiece)
         state.possibleMoves = new Piece().pinnedLegalMoves(state.board, legalMoves, state.selectedPiece, state.selectedPieceLocation)
       }
+      console.log('Here are my possible move: ' + state.possibleMoves)
     },
     move: (state) => {
       console.log('trying to move piece')
