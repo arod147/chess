@@ -4,18 +4,8 @@ import { Piece } from './pieceClasses';
 
 
 export interface State {
-  //I need to keep track of the state of the board to accuratly display any changes
   board: number[]
-  //I need to keep track of whose turn in the game it is. This would also allow me to determine what
-  //pieces can be selected
-  //Ex. white cant move black pieces so white should not be able to select black pieces
   currentPlayer: 'White' | 'Black'
-  //I do need to keep track of what piece the player wants to move
-  //with this information I can give the current position of that piece
-  //to allow the piece class to find me all possible moves for the given piece
-  //Ex. When I select Rook return to me an array with all possible moves
-  //There are special rules to this like castle but if that is a possible move we
-  //would just execute it.
   selectedPiece: number | null
   selectedPieceLocation: number | null
   desiredMove: number | null
@@ -44,7 +34,7 @@ export const createBoard = () => {
     })
   }
 }
-//will be assigned setInterval to start the countdown, in global scope to be manipulated later
+//will be assigned setInterval to wait for player move, in global scope to be manipulated later
 let currentInterval: NodeJS.Timeout 
 
 export const moveFinder = createAsyncThunk<
@@ -77,7 +67,6 @@ export const moveFinder = createAsyncThunk<
 
 export const moveHandler = (location: number) : AppThunk =>
   async (dispatch: AppDispatch, getState) => {
-  
     const response = await dispatch(moveFinder(location))
     if(response.meta.requestStatus === 'fulfilled') {
       clearInterval(currentInterval)
@@ -145,10 +134,9 @@ export const chessSlice = createSlice({
         const legalMoves = new Piece().legalMoves(state.board, state.selectedPieceLocation, state.selectedPiece)
         state.possibleMoves = new Piece().pinnedLegalMoves(state.board, legalMoves, state.selectedPiece, state.selectedPieceLocation)
       }
-      console.log('Here are my possible move: ' + state.possibleMoves)
+      console.log('Here are my selected piece moves: ' + state.possibleMoves)
     },
     move: (state) => {
-      console.log('trying to move piece')
       if(state.desiredMove !== null && state.selectedPiece !== null && state.selectedPieceLocation !== null) {
         console.log('moving piece')
         state.board[state.desiredMove] = state.selectedPiece
@@ -179,7 +167,6 @@ export const chessSlice = createSlice({
       state.desiredMove = null
       state.possibleMoves = []
     },
-    //We use this to allow our pawns to promote
     allowPromotion: (state) => {
       state.promotion = true
     },
@@ -198,13 +185,14 @@ export const chessSlice = createSlice({
         return currentPiece
       })
     },
+    //This action will check after each move to see if a player is in check
     updateCheck: (state) => {
       const isPlayerInCheck = state.board.find((piece, square) => {
         const pieceBinary = (piece).toString(2)
         const pieceColor = pieceBinary.length === 5 ? 'Black' : 'White'
         var pieceMoves: number[]
         var move: number| undefined
-        if(piece != 0 && pieceColor != state.currentPlayer) {
+        if(piece !== 0 && pieceColor !== state.currentPlayer) {
           pieceMoves = new Piece().legalMoves(state.board, square, piece)
           const playerInCheck = pieceMoves.find(move => {
           const attackedPieceBinary = (state.board[move]).toString(2)
@@ -227,7 +215,6 @@ export const chessSlice = createSlice({
 
 export const { setPieces, setEmptyBoard, selectPiece, move, playerMove, promotePawn, clear, allowPromotion, updateCheck } = chessSlice.actions;
 
-// in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
 export const selectBoard = (state: RootState) => state.chess.board
 export const selectCurrentPlayer = (state: RootState) => state.chess.currentPlayer
 export const selectCurrentPiece = (state: RootState) => state.chess.selectedPiece
