@@ -20,9 +20,6 @@ export class Piece {
     Black: number = 16
     White: number = 8
 
-    //NEED TO FIX BUG CURRENTLY YOU CANNOT PUT THE ENEMY PIECE IN CHECK THIS IS CAUSED BY EX. IF THE SELECTED PIECE IS A QUEEN 
-    //IT IS ALSO INCLUDED AS AN ATTACKING PIECE WHEN THE FUCTIONS SEES THAT THIS ATTACKING PIECES MOVE RESULTS IN OPPISITE PLAYER BEING IN CHECK IT IS NOT
-    //ADDED TO TRUE LEGAL MOVES
     //returns our true legal moves
     pinnedLegalMoves(board: number[], legalMoves: number[], selectedPiece: number, selectedLocation: number){
         const selectedPieceBinary = (selectedPiece).toString(2)
@@ -43,10 +40,12 @@ export class Piece {
 
             //Get all our attacking pieces
             boardCopy.forEach((piece, sqaure) => {
-                const fullPieceBinary = (piece).toString(2)
-                const pieceBinary = fullPieceBinary.substring(fullPieceBinary.length-3)
-                if((pieceBinary === '011' || pieceBinary === '100') || pieceBinary === '101'){
-                    attackingPieces.push({type: piece, location: sqaure})
+                if(piece !== selectedPiece && sqaure !== selectedLocation) {
+                    const fullPieceBinary = (piece).toString(2)
+                    const pieceBinary = fullPieceBinary.substring(fullPieceBinary.length-3)
+                    if((pieceBinary === '011' || pieceBinary === '100') || pieceBinary === '101'){
+                        attackingPieces.push({type: piece, location: sqaure})
+                    }
                 }
             })
 
