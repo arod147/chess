@@ -25,12 +25,12 @@ export class Piece {
         const selectedPieceBinary = (selectedPiece).toString(2)
         const isWhite = selectedPieceBinary.length === 5 ? false : true
         const trueLegalMoves: number[] = []
-        console.log('current selected piece = ' + selectedPieceBinary)
-        console.log('Pieces moves = ' + legalMoves)
+        //console.log('current selected piece = ' + selectedPieceBinary)
+        //console.log('Pieces moves = ' + legalMoves)
 
         //Checks to see if any of our legal moves result in putting our own king in check
         legalMoves.forEach(move => {
-            console.log('Checking move = ' + move)
+            //console.log('Checking move = ' + move)
             //We create a copy of the current board to see if after executing this move whe are in check
             const boardCopy = [...board]
             boardCopy[move] = selectedPiece
@@ -54,7 +54,7 @@ export class Piece {
                 const attackingPieceColor = attackingPieceBinary.length === 5 ? 'Black' : 'White'
                 const attackMoves = new Piece().legalMoves(boardCopy, piece.location, piece.type)
 
-                console.log("attacking piece moves: " + attackMoves + ' color: ' + attackingPieceColor)
+                //console.log("attacking piece moves: " + attackMoves + ' color: ' + attackingPieceColor)
                 let attackedPieceBinary: string | null = null
                 let attackedPieceColor: string = 'None'
                 let attackedPieceType: string | null = null
@@ -64,7 +64,7 @@ export class Piece {
                         attackedPieceBinary = (boardCopy[move]).toString(2)
                         attackedPieceColor = attackedPieceBinary.length === 5 ? 'Black' : 'White'
                         attackedPieceType = attackedPieceBinary.substring(attackedPieceBinary.length-3)
-                        console.log('checking attacking move: ' + move + " Piece on square is: "+ attackedPieceType + ' and piece color is ' + attackedPieceColor)
+                        //console.log('checking attacking move: ' + move + " Piece on square is: "+ attackedPieceType + ' and piece color is ' + attackedPieceColor)
                     } else {
                        // console.log('Empty')
                     }
@@ -78,7 +78,7 @@ export class Piece {
             //console.log(x)
             //Only add moves that dont result in self check
             if(x === undefined) {
-                console.log(x)
+                //console.log(x)
                 trueLegalMoves.push(move)
             }
         })

@@ -4,11 +4,11 @@ import {
     moveHandler, 
     selectBoard, 
     selectCurrentPiece, 
-    selectCurrentPieceLocation, 
+    selectCurrentPieceLocation,
+    selectCheck,
     selectCurrentPlayer, 
     playerMove, 
     selectPossibleMoves, } from '../chessSlice';
-import Promotion from '../Promotion';
 import Tile from './Tiles';
 import Piece from './Piece';
 
@@ -16,8 +16,10 @@ const Chessboard = () => {
     const dispatch = useAppDispatch()
     const selectedPiece = useAppSelector(selectCurrentPiece)
     const selectedPieceLocation = useAppSelector(selectCurrentPieceLocation)
+    const currentPlayer = useAppSelector(selectCurrentPlayer)
     const board = useAppSelector(selectBoard)
     const possibleMoves = useAppSelector(selectPossibleMoves)
+    const inCheck = useAppSelector(selectCheck)
 
 
     var currentRow = 0;
@@ -43,7 +45,14 @@ const Chessboard = () => {
           return move
         })
       }
-     // if( check === ture && piece === 22 || 14)
+     if(inCheck === true ) {
+      if(currentPlayer === 'White' && piece === 14) {
+        backGroundColor = 'check'
+      }
+      if(currentPlayer === 'Black' && piece === 22) {
+        backGroundColor = 'check'
+      }
+     }
 
       if(piece !== 0) {
 

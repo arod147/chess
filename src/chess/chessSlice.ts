@@ -21,6 +21,7 @@ export interface State {
   desiredMove: number | null
   possibleMoves: number[]
   promotion: boolean
+  check: boolean
 };
 
 const initialState: State = {
@@ -30,7 +31,8 @@ const initialState: State = {
   selectedPieceLocation: null,
   desiredMove: null,
   possibleMoves: [],
-  promotion: false
+  promotion: false,
+  check: false
 };
 
 export const createBoard = () => {
@@ -81,6 +83,7 @@ export const moveHandler = (location: number) : AppThunk =>
       clearInterval(currentInterval)
       console.log('Promise returned true')
       dispatch(move())
+      dispatch(updateCheck())
       return true
     } else {
       console.log('Promise returned false')
@@ -196,15 +199,33 @@ export const chessSlice = createSlice({
       })
     },
     updateCheck: (state) => {
-      
-    }
-},
-  extraReducers: (builder) => {
-  
-  },
+      const isPlayerInCheck = state.board.find((piece, square) => {
+        const pieceBinary = (piece).toString(2)
+        const pieceColor = pieceBinary.length === 5 ? 'Black' : 'White'
+        var pieceMoves: number[]
+        var move: number| undefined
+        if(piece != 0 && pieceColor != state.currentPlayer) {
+          pieceMoves = new Piece().legalMoves(state.board, square, piece)
+          const playerInCheck = pieceMoves.find(move => {
+          const attackedPieceBinary = (state.board[move]).toString(2)
+          const attackPieceType = attackedPieceBinary.substring(attackedPieceBinary.length-3)
+          return attackPieceType === '110'
+          })
+          move = playerInCheck
+          console.log(playerInCheck)
+        }
+        return move !== undefined 
+      })
+      if(isPlayerInCheck !== undefined) {
+        state.check = true 
+      } else {
+        state.check = false
+      }
+    },
+}
 });
 
-export const { setPieces, setEmptyBoard, selectPiece, move, playerMove, promotePawn, clear, allowPromotion } = chessSlice.actions;
+export const { setPieces, setEmptyBoard, selectPiece, move, playerMove, promotePawn, clear, allowPromotion, updateCheck } = chessSlice.actions;
 
 // in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
 export const selectBoard = (state: RootState) => state.chess.board
@@ -213,6 +234,7 @@ export const selectCurrentPiece = (state: RootState) => state.chess.selectedPiec
 export const selectCurrentPieceLocation = (state: RootState) => state.chess.selectedPieceLocation
 export const selectPossibleMoves = (state: RootState) => state.chess.possibleMoves
 export const selectPromotion = (state: RootState) => state.chess.promotion
+export const selectCheck = (state: RootState) => state.chess.check
 
 export default chessSlice.reducer;
 
