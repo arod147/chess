@@ -66,7 +66,7 @@ export const moveFinder = createAsyncThunk<
   )
 
 export const moveHandler = (location: number) : AppThunk =>
-  async (dispatch: AppDispatch, getState) => {
+  async (dispatch: AppDispatch) => {
     const response = await dispatch(moveFinder(location))
     if(response.meta.requestStatus === 'fulfilled') {
       clearInterval(currentInterval)
@@ -74,7 +74,8 @@ export const moveHandler = (location: number) : AppThunk =>
       dispatch(move())
       dispatch(updateCheck())
       return true
-    } else {
+    } 
+    if(response.meta.requestStatus === 'rejected') {
       console.log('Promise returned false')
       clearInterval(currentInterval)
     }
@@ -131,10 +132,13 @@ export const chessSlice = createSlice({
       if(pieceColor === state.currentPlayer){
         state.selectedPieceLocation = location.payload
         state.selectedPiece = piece
+        //console.log('Slected piece and location: ' + state.selectedPiece + " " + state.selectedPieceLocation)
         const legalMoves = new Piece().legalMoves(state.board, state.selectedPieceLocation, state.selectedPiece)
+        //console.log('above pieces moves: ' + legalMoves)
         state.possibleMoves = new Piece().pinnedLegalMoves(state.board, legalMoves, state.selectedPiece, state.selectedPieceLocation)
+        //console.log('above Pieces true legal moves ' + state.possibleMoves)
       }
-      console.log('Here are my selected piece moves: ' + state.possibleMoves)
+      //console.log('Here are my selected piece moves: ' + state.possibleMoves)
     },
     move: (state) => {
       if(state.desiredMove !== null && state.selectedPiece !== null && state.selectedPieceLocation !== null) {

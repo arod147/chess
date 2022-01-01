@@ -7,6 +7,10 @@
 // 48 49 50 51 52 53 54 55
 // 56 57 58 59 60 61 62 63
 
+// When pawns reaches opposite side of board error line 125 of pieceClass
+// When pawns at the left or right edge of the board reach the sqaure before the end of top or bottom of the board same error
+// Not to sure what is causes this error but a have determined that the problem lies within legal moves only for 
+// pawns all other pieces worked fine.
 export class Piece {
 
     None: number = 0
@@ -28,7 +32,7 @@ export class Piece {
 
         //Checks to see if any of our legal moves result in putting our own king in check
         legalMoves.forEach(move => {
-            //We create a copy of the current board to see if after executing this move whe are in check
+            //We create a copy of the current board to see if after executing this move we are in check
             const boardCopy = [...board]
             boardCopy[move] = selectedPiece
             boardCopy[selectedLocation] = new Piece().None
