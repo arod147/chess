@@ -43,7 +43,7 @@ export class Piece {
                 const fullPieceBinary = (piece).toString(2)
                 const pieceBinary = fullPieceBinary.substring(fullPieceBinary.length-3)
                 const pieceColor = fullPieceBinary.length === 5 ? false : true
-                if(piece !== selectedPiece && sqaure !== selectedLocation && pieceColor !== isWhite) {
+                if(pieceColor !== isWhite) {
                     if((pieceBinary === '011' || pieceBinary === '100') || pieceBinary === '101'){
                         attackingPieces.push({type: piece, location: sqaure})
                     }
