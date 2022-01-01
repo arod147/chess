@@ -3,13 +3,7 @@ import './App.css';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import { 
     createBoard, 
-    moveHandler, 
-    selectBoard, 
-    selectCurrentPiece, 
-    selectCurrentPieceLocation, 
     selectCurrentPlayer, 
-    playerMove, 
-    selectPossibleMoves, 
     setPieces } from './chess/chessSlice';
 import Chessboard from './chess/Components/Chessboard';
 import Promotion from './chess/Promotion';

@@ -40,9 +40,10 @@ export class Piece {
 
             //Get all our attacking pieces
             boardCopy.forEach((piece, sqaure) => {
-                if(piece !== selectedPiece && sqaure !== selectedLocation) {
-                    const fullPieceBinary = (piece).toString(2)
-                    const pieceBinary = fullPieceBinary.substring(fullPieceBinary.length-3)
+                const fullPieceBinary = (piece).toString(2)
+                const pieceBinary = fullPieceBinary.substring(fullPieceBinary.length-3)
+                const pieceColor = fullPieceBinary.length === 5 ? false : true
+                if(piece !== selectedPiece && sqaure !== selectedLocation && pieceColor !== isWhite) {
                     if((pieceBinary === '011' || pieceBinary === '100') || pieceBinary === '101'){
                         attackingPieces.push({type: piece, location: sqaure})
                     }
