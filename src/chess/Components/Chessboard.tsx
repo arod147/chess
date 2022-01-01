@@ -24,8 +24,6 @@ const Chessboard = () => {
 
     var currentRow = 0;
     const chessBoard = board.map((piece, square)=> {
-    let binary = (piece).toString(2)
-    let pieceColor = binary.length === 5 ? 'Black' : 'White';
     let moves = possibleMoves
     var backGroundColor = 'none'
     
