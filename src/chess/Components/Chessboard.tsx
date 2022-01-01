@@ -43,6 +43,7 @@ const Chessboard = () => {
           return move
         })
       }
+     // if( check === ture && piece === 22 || 14)
 
       if(piece !== 0) {
 

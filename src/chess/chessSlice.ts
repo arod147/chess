@@ -81,7 +81,7 @@ export const moveHandler = (location: number) : AppThunk =>
       clearInterval(currentInterval)
       console.log('Promise returned true')
       dispatch(move())
-          return true
+      return true
     } else {
       console.log('Promise returned false')
       clearInterval(currentInterval)
@@ -195,6 +195,9 @@ export const chessSlice = createSlice({
         return currentPiece
       })
     },
+    updateCheck: (state) => {
+      
+    }
 },
   extraReducers: (builder) => {
   
