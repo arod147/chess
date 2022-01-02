@@ -24,6 +24,93 @@ export class Piece {
     Black: number = 16
     White: number = 8
 
+    allMoves(board: number[]) {
+        const pieceMoves: number[][] = []
+            board.map((piece, squareIndex) => {
+                if(piece === 0){
+                    pieceMoves.push([])
+                }
+                else{
+                    pieceMoves.push(this.legalMoves(board, squareIndex, piece))
+                }
+            })
+        return pieceMoves
+    }
+
+    // NOTE: this does not cover pinned cases at all. need to figure out how to implement that better
+    trueLegalMoves(board: number[], selectedLocation: number, selectedPiece: number){
+        const binary = (selectedPiece).toString(2)
+        const isWhite = binary.length === 4 ? true : false
+        const enemyPieceIndexies: number[] = []
+
+        const allMoves = this.allMoves(board)
+
+        const kingSpace = board.findIndex((piece) => {
+            return piece === (isWhite ? 14 : 22)
+        })
+
+        console.log('kingSpace = ' + kingSpace)
+
+        // find all pieces attacking the friendly king
+        // and all enemy pieces
+        const threatIndexies: number[] = []
+        for(let index = 0; index < 64; index++){
+            const pieceBinaryLength = board[index].toString(2).length
+            const isWhitePiece = pieceBinaryLength > 1 ? pieceBinaryLength === 4 ? true : false : null
+            if(isWhite !== isWhitePiece){
+                enemyPieceIndexies.push(index)
+            }
+            if (allMoves[index].includes(kingSpace) && isWhite !== isWhitePiece){
+                threatIndexies.push(index)
+            }
+        }
+
+        // gathers all the possible moves of the enemy pieces and the enemy pieces attacking the friendly king 
+        const threatendSpaces = threatIndexies.map((location) => {
+            return allMoves[location]
+        }).flat()
+
+        const enemyMoves = enemyPieceIndexies.map((location) => {
+            return allMoves[location]
+        }).flat()
+
+        // can only move the king if there is more than 1 attacker checking
+        if(threatIndexies.length > 1 && selectedPiece !== (isWhite ? 14 : 22)){
+            return <number[]>[]
+        }
+
+        // king can always move away from check, whether there is 1 or 2 attackers
+        // if king cant move this will return nothing
+        // king cannot move into check, or capture protected pieces
+        // BUG: king cannot move right now at all
+        if(selectedPiece === (isWhite ? 14 : 22)){
+            return <number[]>allMoves[selectedLocation].map((move) => {
+                if (!enemyMoves && board[move].toString(2).length !== (isWhite ? 4 : 5)){
+                    return move
+                }
+            })
+        }
+
+        // if our move is includes in the threatened spaces we can move there to block
+        // BUG: threatened spaces include all enemy moves, not simply the ones directed at the king
+        // BUG: cannot capture pieces threatening king
+        if (threatIndexies.length > 0){
+            return <number[]>allMoves[selectedLocation].map((move) => {
+                if(threatendSpaces.includes(move) && board[move].toString(2).length !== (isWhite ? 4 : 5)){
+                    return move
+                }
+            })
+        }
+
+
+        return <number[]>allMoves[selectedLocation].map((move) => {
+            if(board[move].toString(2).length !== (isWhite ? 4 : 5)){
+                return move
+            }
+        })
+        
+    }
+    
     //returns our true legal moves
     pinnedLegalMoves(board: number[], legalMoves: number[], selectedPiece: number, selectedLocation: number){
         const selectedPieceBinary = (selectedPiece).toString(2)
@@ -130,7 +217,7 @@ export class Piece {
 
                     // prevents overflow issues for edge pawns
                     if ((distanceToEdges[boardSpace][1] + (isWhite ? 1 : -1)) === distanceToEdges[startSquare][1]){
-                        if (pieceOnTargetSquareColor !== pieceColor && pieceOnTargetSquareColor !== 'None'){
+                        if (pieceOnTargetSquareColor !== 'None'){
                             possibleMoves.push(startSquare + (isWhite ? -pawnOffsets[i] : pawnOffsets[i]))                   
                         }
                     }
@@ -148,9 +235,7 @@ export class Piece {
                             let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
                             
                             if(distanceToEdges[startSquare+currentOffset][i]+2 === distanceToEdges[startSquare][i]){
-                                if(pieceOnTargetSquareColor !== pieceColor){
-                                    possibleMoves.push(startSquare+currentOffset)
-                                }
+                                possibleMoves.push(startSquare+currentOffset)
                             }
                         }
                     }
@@ -166,11 +251,11 @@ export class Piece {
                         let targetPiece = (pieceOnTargetSquare).toString(2)
                         let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
 
+                        possibleMoves.push(targetSquare)
+
                         if(pieceOnTargetSquareColor === pieceColor) {
                             break;
                         }
-
-                        possibleMoves.push(targetSquare)
 
                         if(pieceOnTargetSquareColor !== pieceColor && pieceOnTargetSquareColor !== 'None') {
                             break;
@@ -186,12 +271,12 @@ export class Piece {
                         let targetSquare = startSquare + rookOffsets[directionIndex] * (n + 1);
                         let targetPiece = (board[targetSquare]).toString(2); // convert piece to binary
                         let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
-                        
+
+                        possibleMoves.push(targetSquare)
+
                         if(pieceOnTargetSquareColor === pieceColor) {
                             break;
                         }
-
-                        possibleMoves.push(targetSquare)
 
                         if(pieceOnTargetSquareColor !== pieceColor && pieceOnTargetSquareColor !== 'None') {
                             break;
@@ -209,12 +294,12 @@ export class Piece {
                         let pieceOnTargetSquare = board[targetSquare];
                         let targetPiece = (pieceOnTargetSquare).toString(2)
                         let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
+    
+                        possibleMoves.push(targetSquare)
 
                         if(pieceOnTargetSquareColor === pieceColor) {
                             break;
                         }
-    
-                        possibleMoves.push(targetSquare)
 
                         if(pieceOnTargetSquareColor !== pieceColor && pieceOnTargetSquareColor !== 'None') {
                             break;
@@ -233,9 +318,7 @@ export class Piece {
                         let targetPiece = (pieceOnTargetSquare).toString(2)
                         let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
                         
-                        if(pieceOnTargetSquareColor !== pieceColor) {
-                            possibleMoves.push(targetSquare)
-                        }
+                        possibleMoves.push(targetSquare)
                     }
                 }
                 break;
