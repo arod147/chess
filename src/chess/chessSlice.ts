@@ -135,8 +135,7 @@ export const chessSlice = createSlice({
         //console.log('Slected piece and location: ' + state.selectedPiece + " " + state.selectedPieceLocation)
         const legalMoves = new Piece().legalMoves(state.board, state.selectedPieceLocation, state.selectedPiece)
         //console.log('above pieces moves: ' + legalMoves)
-        state.possibleMoves = new Piece().trueLegalMoves(state.board, state.selectedPieceLocation, state.selectedPiece)
-        // state.possibleMoves = new Piece().pinnedLegalMoves(state.board, legalMoves, state.selectedPiece, state.selectedPieceLocation)
+        state.possibleMoves = new Piece().pinnedLegalMoves(state.board, legalMoves, state.selectedPiece, state.selectedPieceLocation)
         //console.log('above Pieces true legal moves ' + state.possibleMoves)
       }
       //console.log('Here are my selected piece moves: ' + state.possibleMoves)
