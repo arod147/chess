@@ -24,143 +24,108 @@ export class Piece {
     Black: number = 16
     White: number = 8
 
-    allMoves(board: number[]) {
-        const pieceMoves: number[][] = []
-            board.map((piece, squareIndex) => {
-                if(piece === 0){
-                    pieceMoves.push([])
-                }
-                else{
-                    pieceMoves.push(this.legalMoves(board, squareIndex, piece))
-                }
-            })
-        return pieceMoves
-    }
-
-    // NOTE: this does not cover pinned cases at all. need to figure out how to implement that better
-    trueLegalMoves(board: number[], selectedLocation: number, selectedPiece: number){
+    // returns legal moves after accounting for checks and friendly pieces
+    trueLegalMoves(board: number[], selectedLocation: number, selectedPiece: number): number[]{
         const binary = (selectedPiece).toString(2)
-        const isWhite = binary.length === 4 ? true : false
+        const isWhite = binary.length > 1 ? binary.length === 4 ? true : false : null
         const enemyPieceIndexies: number[] = []
+        const selectedPieceMoves = this.legalMoves(board, selectedLocation, selectedPiece)
 
-        const allMoves = this.allMoves(board)
-
-        const kingSpace = board.findIndex((piece) => {
-            return piece === (isWhite ? 14 : 22)
-        })
-
-        console.log('kingSpace = ' + kingSpace)
-
-        // find all pieces attacking the friendly king
-        // and all enemy pieces
-        const threatIndexies: number[] = []
+        // find all enemy pieces
         for(let index = 0; index < 64; index++){
             const pieceBinaryLength = board[index].toString(2).length
             const isWhitePiece = pieceBinaryLength > 1 ? pieceBinaryLength === 4 ? true : false : null
-            if(isWhite !== isWhitePiece){
+            if(isWhite !== isWhitePiece && isWhitePiece !== null){
                 enemyPieceIndexies.push(index)
             }
-            if (allMoves[index].includes(kingSpace) && isWhite !== isWhitePiece){
-                threatIndexies.push(index)
-            }
         }
 
-        // gathers all the possible moves of the enemy pieces and the enemy pieces attacking the friendly king 
-        const threatendSpaces = threatIndexies.map((location) => {
-            return allMoves[location]
-        }).flat()
+        // play a move on the board, if the friendly king is not in check after that move the move is legal
+        // return an array of all legal moves
+        return <number[]>selectedPieceMoves.map((move) => {
+            const boardCopy = [...board]
+            console.log('piece on move tile = ' +boardCopy[move])
+            const pieceBinaryLength = boardCopy[move].toString(2).length
+            const isWhitePiece = pieceBinaryLength > 1 ? pieceBinaryLength === 4 ? true : false : null
 
-        const enemyMoves = enemyPieceIndexies.map((location) => {
-            return allMoves[location]
-        }).flat()
+            if (isWhite !== isWhitePiece){
+                boardCopy[selectedLocation] = this.None
+                boardCopy[move] = selectedPiece
 
-        // can only move the king if there is more than 1 attacker checking
-        if(threatIndexies.length > 1 && selectedPiece !== (isWhite ? 14 : 22)){
-            return <number[]>[]
-        }
+                // gathers all the enemy piece moves and checks if any of them include the friendly king
+                const enemyMoves = enemyPieceIndexies.map((location) => {
+                    // accounts for if we capture the attacking piece
+                    if(location === move && pieceBinaryLength > 1){
+                        return
+                    }
+                    return this.legalMoves(boardCopy, location, boardCopy[location])
+                }).flat()
 
-        // king can always move away from check, whether there is 1 or 2 attackers
-        // if king cant move this will return nothing
-        // king cannot move into check, or capture protected pieces
-        // BUG: king cannot move right now at all
-        if(selectedPiece === (isWhite ? 14 : 22)){
-            return <number[]>allMoves[selectedLocation].map((move) => {
-                if (!enemyMoves && board[move].toString(2).length !== (isWhite ? 4 : 5)){
+                const kingSpace = boardCopy.findIndex((piece) => {
+                    return piece === (isWhite ? 14 : 22)
+                })
+
+                if(!enemyMoves.includes(kingSpace)){
                     return move
                 }
-            })
-        }
-
-        // if our move is includes in the threatened spaces we can move there to block
-        // BUG: threatened spaces include all enemy moves, not simply the ones directed at the king
-        // BUG: cannot capture pieces threatening king
-        if (threatIndexies.length > 0){
-            return <number[]>allMoves[selectedLocation].map((move) => {
-                if(threatendSpaces.includes(move) && board[move].toString(2).length !== (isWhite ? 4 : 5)){
-                    return move
-                }
-            })
-        }
-
-
-        return <number[]>allMoves[selectedLocation].map((move) => {
-            if(board[move].toString(2).length !== (isWhite ? 4 : 5)){
-                return move
             }
+            // returns nothing if the move is invalid
+            return 
         })
-        
+
     }
     
-    //returns our true legal moves
-    pinnedLegalMoves(board: number[], legalMoves: number[], selectedPiece: number, selectedLocation: number){
-        const selectedPieceBinary = (selectedPiece).toString(2)
-        const selectedPieceColor = selectedPieceBinary.length === 5 ? 'Black' : 'White'
-        const trueLegalMoves: number[] = []
+    // //returns our true legal moves
+    // pinnedLegalMoves(board: number[], legalMoves: number[], selectedPiece: number, selectedLocation: number){
+    //     const selectedPieceBinary = (selectedPiece).toString(2)
+    //     const selectedPieceColor = selectedPieceBinary.length === 5 ? 'Black' : 'White'
+    //     const trueLegalMoves: number[] = []
 
-        //Checks to see if any of our legal moves result in putting our own king in check
-        legalMoves.forEach(move => {
-            //We create a copy of the current board to see if after executing this move we are in check
-            const boardCopy = [...board]
-            boardCopy[move] = selectedPiece
-            boardCopy[selectedLocation] = new Piece().None
-            //Used to keep track of attacking pieces
-            const attackingPieces: {type: number, location: number}[] = []
+    //     //Checks to see if any of our legal moves result in putting our own king in check
+    //     legalMoves.forEach(move => {
+    //         //We create a copy of the current board to see if after executing this move we are in check
+    //         const boardCopy = [...board]
+    //         boardCopy[move] = selectedPiece
+    //         boardCopy[selectedLocation] = new Piece().None
+    //         //Used to keep track of attacking pieces
+    //         const attackingPieces: {type: number, location: number}[] = []
 
-            //Get all our oppenents attacking pieces
-            boardCopy.forEach((piece, sqaure) => {
-                if(piece !== 0) {
-                    const fullPieceBinary = (piece).toString(2)
-                    const pieceColor = fullPieceBinary.length === 5 ? 'Black' : 'White'
-                    if(pieceColor !== selectedPieceColor) {
-                            attackingPieces.push({type: piece, location: sqaure})
-                    }
-                }
-            })
+    //         //Get all our oppenents attacking pieces
+    //         boardCopy.forEach((piece, sqaure) => {
+    //             if(piece !== 0) {
+    //                 const fullPieceBinary = (piece).toString(2)
+    //                 const pieceColor = fullPieceBinary.length === 5 ? 'Black' : 'White'
+    //                 if(pieceColor !== selectedPieceColor) {
+    //                         attackingPieces.push({type: piece, location: sqaure})
+    //                 }
+    //             }
+    //         })
             
-            //See if any of our attacking pieces are attacking the king
-            const x = attackingPieces.find(piece => {
-                const attackMoves = new Piece().legalMoves(boardCopy, piece.location, piece.type)
-                let attackedPieceBinary: string | null = null
-                let attackedPieceType: string | null = null
+    //         //See if any of our attacking pieces are attacking the king
+    //         const x = attackingPieces.find(piece => {
+    //             const attackMoves = new Piece().legalMoves(boardCopy, piece.location, piece.type)
+    //             let attackedPieceBinary: string | null = null
+    //             let attackedPieceType: string | null = null
 
-                const foundMove = attackMoves.find(move => {
-                    if(boardCopy[move] !== 0) {
-                        attackedPieceBinary = (boardCopy[move]).toString(2)
-                        attackedPieceType = attackedPieceBinary.substring(attackedPieceBinary.length-3)
-                    } 
-                    //We return the move that is attacking our king
-                    return attackedPieceType === '110'
-                })
-                return foundMove !== undefined
-            })
-            //Only add moves that dont result in self check 
-            if(x === undefined) {
-                trueLegalMoves.push(move)
-            }
-        })
-        return trueLegalMoves
-    }
+    //             const foundMove = attackMoves.find(move => {
+    //                 if(boardCopy[move] !== 0) {
+    //                     attackedPieceBinary = (boardCopy[move]).toString(2)
+    //                     attackedPieceType = attackedPieceBinary.substring(attackedPieceBinary.length-3)
+    //                 } 
+    //                 //We return the move that is attacking our king
+    //                 return attackedPieceType === '110'
+    //             })
+    //             return foundMove !== undefined
+    //         })
+    //         //Only add moves that dont result in self check 
+    //         if(x === undefined) {
+    //             trueLegalMoves.push(move)
+    //         }
+    //     })
+    //     return trueLegalMoves
+    // }
 
+    // returns numbers of squares to the edge of the board per square
     PrecomputedMoveData() {
     const numSquaresToEdge: number[][] = []
     for (let file = 0; file < 8; file ++) {
@@ -188,7 +153,7 @@ export class Piece {
     }
 
     
-
+    // returns piece move rules
     legalMoves(board: number[], startSquare: number, selectedPiece: number): number[] {
         const distanceToEdges: number[][] = this.PrecomputedMoveData()
         const possibleMoves: number[] = []
@@ -211,17 +176,19 @@ export class Piece {
                     possibleMoves.push(startSquare + singlePawnMove)
                 }
                 for(let i = 0; i < 2; i++){ //check diagonals for enemy pieces
-                    let boardSpace = startSquare + (isWhite ? -pawnOffsets[i] : pawnOffsets[i])
-                    let targetPiece = (board[boardSpace]).toString(2)
-                    let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
+                    // prevents overflow when pawn reaches end of the board
+                    if (board[startSquare + (isWhite ? -pawnOffsets[i] : pawnOffsets[i])] !== undefined){
+                        let boardSpace = startSquare + (isWhite ? -pawnOffsets[i] : pawnOffsets[i])
+                        let targetPiece = (board[boardSpace]).toString(2)
+                        let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
 
-                    // prevents overflow issues for edge pawns
-                    if ((distanceToEdges[boardSpace][1] + (isWhite ? 1 : -1)) === distanceToEdges[startSquare][1]){
-                        if (pieceOnTargetSquareColor !== 'None'){
+                        // prevents overflow issues for edge pawns
+                        if ((distanceToEdges[boardSpace][1] + (isWhite ? 1 : -1)) === distanceToEdges[startSquare][1]
+                        && pieceOnTargetSquareColor !== 'None'){
                             possibleMoves.push(startSquare + (isWhite ? -pawnOffsets[i] : pawnOffsets[i]))                   
+                        
                         }
                     }
-
                 }
                 break;
 
@@ -300,11 +267,9 @@ export class Piece {
                         if(pieceOnTargetSquareColor === pieceColor) {
                             break;
                         }
-
                         if(pieceOnTargetSquareColor !== pieceColor && pieceOnTargetSquareColor !== 'None') {
                             break;
                         }
-
                     }
                 }
                 break;
