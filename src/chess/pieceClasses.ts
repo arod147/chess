@@ -24,55 +24,140 @@ export class Piece {
     Black: number = 16
     White: number = 8
 
-    //returns our true legal moves
-    pinnedLegalMoves(board: number[], legalMoves: number[], selectedPiece: number, selectedLocation: number){
-        const selectedPieceBinary = (selectedPiece).toString(2)
-        const selectedPieceColor = selectedPieceBinary.length === 5 ? 'Black' : 'White'
-        const trueLegalMoves: number[] = []
-
-        //Checks to see if any of our legal moves result in putting our own king in check
-        legalMoves.forEach(move => {
-            //We create a copy of the current board to see if after executing this move we are in check
-            const boardCopy = [...board]
-            boardCopy[move] = selectedPiece
-            boardCopy[selectedLocation] = new Piece().None
-            //Used to keep track of attacking pieces
-            const attackingPieces: {type: number, location: number}[] = []
-
-            //Get all our oppenents attacking pieces
-            boardCopy.forEach((piece, sqaure) => {
-                if(piece !== 0) {
-                    const fullPieceBinary = (piece).toString(2)
-                    const pieceColor = fullPieceBinary.length === 5 ? 'Black' : 'White'
-                    if(pieceColor !== selectedPieceColor) {
-                            attackingPieces.push({type: piece, location: sqaure})
-                    }
+    allMoves(board: number[]) {
+        const pieceMoves: number[][] = []
+            board.map((piece, squareIndex) => {
+                if(piece === 0){
+                    pieceMoves.push([])
+                }
+                else{
+                    pieceMoves.push(this.legalMoves(board, squareIndex, piece))
                 }
             })
-            
-            //See if any of our attacking pieces are attacking the king
-            const x = attackingPieces.find(piece => {
-                const attackMoves = new Piece().legalMoves(boardCopy, piece.location, piece.type)
-                let attackedPieceBinary: string | null = null
-                let attackedPieceType: string | null = null
-
-                const foundMove = attackMoves.find(move => {
-                    if(boardCopy[move] !== 0) {
-                        attackedPieceBinary = (boardCopy[move]).toString(2)
-                        attackedPieceType = attackedPieceBinary.substring(attackedPieceBinary.length-3)
-                    } 
-                    //We return the move that is attacking our king
-                    return attackedPieceType === '110'
-                })
-                return foundMove !== undefined
-            })
-            //Only add moves that dont result in self check 
-            if(x === undefined) {
-                trueLegalMoves.push(move)
-            }
-        })
-        return trueLegalMoves
+        return pieceMoves
     }
+
+    // NOTE: this does not cover pinned cases at all. need to figure out how to implement that better
+    trueLegalMoves(board: number[], selectedLocation: number, selectedPiece: number){
+        const binary = (selectedPiece).toString(2)
+        const isWhite = binary.length === 4 ? true : false
+        const enemyPieceIndexies: number[] = []
+
+        const allMoves = this.allMoves(board)
+
+        const kingSpace = board.findIndex((piece) => {
+            return piece === (isWhite ? 14 : 22)
+        })
+
+        console.log('kingSpace = ' + kingSpace)
+
+        // find all pieces attacking the friendly king
+        // and all enemy pieces
+        const threatIndexies: number[] = []
+        for(let index = 0; index < 64; index++){
+            const pieceBinaryLength = board[index].toString(2).length
+            const isWhitePiece = pieceBinaryLength > 1 ? pieceBinaryLength === 4 ? true : false : null
+            if(isWhite !== isWhitePiece){
+                enemyPieceIndexies.push(index)
+            }
+            if (allMoves[index].includes(kingSpace) && isWhite !== isWhitePiece){
+                threatIndexies.push(index)
+            }
+        }
+
+        // gathers all the possible moves of the enemy pieces and the enemy pieces attacking the friendly king 
+        const threatendSpaces = threatIndexies.map((location) => {
+            return allMoves[location]
+        }).flat()
+
+        const enemyMoves = enemyPieceIndexies.map((location) => {
+            return allMoves[location]
+        }).flat()
+
+        // can only move the king if there is more than 1 attacker checking
+        if(threatIndexies.length > 1 && selectedPiece !== (isWhite ? 14 : 22)){
+            return <number[]>[]
+        }
+
+        // king can always move away from check, whether there is 1 or 2 attackers
+        // if king cant move this will return nothing
+        // king cannot move into check, or capture protected pieces
+        // BUG: king cannot move right now at all
+        if(selectedPiece === (isWhite ? 14 : 22)){
+            return <number[]>allMoves[selectedLocation].map((move) => {
+                if (!enemyMoves && board[move].toString(2).length !== (isWhite ? 4 : 5)){
+                    return move
+                }
+            })
+        }
+
+        // if our move is includes in the threatened spaces we can move there to block
+        // BUG: threatened spaces include all enemy moves, not simply the ones directed at the king
+        // BUG: cannot capture pieces threatening king
+        if (threatIndexies.length > 0){
+            return <number[]>allMoves[selectedLocation].map((move) => {
+                if(threatendSpaces.includes(move) && board[move].toString(2).length !== (isWhite ? 4 : 5)){
+                    return move
+                }
+            })
+        }
+        
+        return <number[]>allMoves[selectedLocation].map((move) => {
+            if(board[move].toString(2).length !== (isWhite ? 4 : 5)){
+                return move
+            }
+        }) 
+    }
+
+    //returns our true legal moves
+    // pinnedLegalMoves(board: number[], legalMoves: number[], selectedPiece: number, selectedLocation: number){
+    //     const selectedPieceBinary = (selectedPiece).toString(2)
+    //     const selectedPieceColor = selectedPieceBinary.length === 5 ? 'Black' : 'White'
+    //     const trueLegalMoves: number[] = []
+
+    //     //Checks to see if any of our legal moves result in putting our own king in check
+    //     legalMoves.forEach(move => {
+    //         //We create a copy of the current board to see if after executing this move we are in check
+    //         const boardCopy = [...board]
+    //         boardCopy[move] = selectedPiece
+    //         boardCopy[selectedLocation] = new Piece().None
+    //         //Used to keep track of attacking pieces
+    //         const attackingPieces: {type: number, location: number}[] = []
+
+    //         //Get all our oppenents attacking pieces
+    //         boardCopy.forEach((piece, sqaure) => {
+    //             if(piece !== 0) {
+    //                 const fullPieceBinary = (piece).toString(2)
+    //                 const pieceColor = fullPieceBinary.length === 5 ? 'Black' : 'White'
+    //                 if(pieceColor !== selectedPieceColor) {
+    //                         attackingPieces.push({type: piece, location: sqaure})
+    //                 }
+    //             }
+    //         })
+            
+    //         //See if any of our attacking pieces are attacking the king
+    //         const x = attackingPieces.find(piece => {
+    //             const attackMoves = new Piece().legalMoves(boardCopy, piece.location, piece.type)
+    //             let attackedPieceBinary: string | null = null
+    //             let attackedPieceType: string | null = null
+
+    //             const foundMove = attackMoves.find(move => {
+    //                 if(boardCopy[move] !== 0) {
+    //                     attackedPieceBinary = (boardCopy[move]).toString(2)
+    //                     attackedPieceType = attackedPieceBinary.substring(attackedPieceBinary.length-3)
+    //                 } 
+    //                 //We return the move that is attacking our king
+    //                 return attackedPieceType === '110'
+    //             })
+    //             return foundMove !== undefined
+    //         })
+    //         //Only add moves that dont result in self check 
+    //         if(x === undefined) {
+    //             trueLegalMoves.push(move)
+    //         }
+    //     })
+    //     return trueLegalMoves
+    // }
 
     PrecomputedMoveData() {
     const numSquaresToEdge: number[][] = []
@@ -101,7 +186,6 @@ export class Piece {
     }
 
     
-
     legalMoves(board: number[], startSquare: number, selectedPiece: number): number[] {
         const distanceToEdges: number[][] = this.PrecomputedMoveData()
         const possibleMoves: number[] = []
@@ -115,7 +199,6 @@ export class Piece {
                 const isWhite = pieceColor === 'White'
                 let singlePawnMove = isWhite ? -8 : 8 
                 const pawnOffsets = [9, 7]
-
                 if (board[startSquare + singlePawnMove] === 0){
                     if ((startSquare > (isWhite ? 47 : 7) && startSquare < (isWhite ? 56 : 16))
                     && board[startSquare + singlePawnMove*2] === 0){
@@ -130,7 +213,7 @@ export class Piece {
 
                     // prevents overflow issues for edge pawns
                     if ((distanceToEdges[boardSpace][1] + (isWhite ? 1 : -1)) === distanceToEdges[startSquare][1]){
-                        if (pieceOnTargetSquareColor !== pieceColor && pieceOnTargetSquareColor !== 'None'){
+                        if (pieceOnTargetSquareColor !== 'None'){ // && pieceOnTargetSquareColor !== pieceColor (removed to allow friendly piece protection)
                             possibleMoves.push(startSquare + (isWhite ? -pawnOffsets[i] : pawnOffsets[i]))                   
                         }
                     }
@@ -148,9 +231,9 @@ export class Piece {
                             let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
                             
                             if(distanceToEdges[startSquare+currentOffset][i]+2 === distanceToEdges[startSquare][i]){
-                                if(pieceOnTargetSquareColor !== pieceColor){
+                                // if(pieceOnTargetSquareColor !== pieceColor){
                                     possibleMoves.push(startSquare+currentOffset)
-                                }
+                                // }
                             }
                         }
                     }
@@ -166,11 +249,15 @@ export class Piece {
                         let targetPiece = (pieceOnTargetSquare).toString(2)
                         let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
 
+                        // if(pieceOnTargetSquareColor === pieceColor) {
+                        //     break;
+                        // }
+
+                        possibleMoves.push(targetSquare)
+
                         if(pieceOnTargetSquareColor === pieceColor) {
                             break;
                         }
-
-                        possibleMoves.push(targetSquare)
 
                         if(pieceOnTargetSquareColor !== pieceColor && pieceOnTargetSquareColor !== 'None') {
                             break;
@@ -187,11 +274,15 @@ export class Piece {
                         let targetPiece = (board[targetSquare]).toString(2); // convert piece to binary
                         let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
                         
+                        // if(pieceOnTargetSquareColor === pieceColor) {
+                        //     break;
+                        // }
+
+                        possibleMoves.push(targetSquare)
+
                         if(pieceOnTargetSquareColor === pieceColor) {
                             break;
                         }
-
-                        possibleMoves.push(targetSquare)
 
                         if(pieceOnTargetSquareColor !== pieceColor && pieceOnTargetSquareColor !== 'None') {
                             break;
@@ -210,11 +301,15 @@ export class Piece {
                         let targetPiece = (pieceOnTargetSquare).toString(2)
                         let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
 
+                        // if(pieceOnTargetSquareColor === pieceColor) {
+                        //     break;
+                        // }
+    
+                        possibleMoves.push(targetSquare)
+
                         if(pieceOnTargetSquareColor === pieceColor) {
                             break;
                         }
-    
-                        possibleMoves.push(targetSquare)
 
                         if(pieceOnTargetSquareColor !== pieceColor && pieceOnTargetSquareColor !== 'None') {
                             break;
@@ -233,9 +328,9 @@ export class Piece {
                         let targetPiece = (pieceOnTargetSquare).toString(2)
                         let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
                         
-                        if(pieceOnTargetSquareColor !== pieceColor) {
+                        // if(pieceOnTargetSquareColor !== pieceColor) {
                             possibleMoves.push(targetSquare)
-                        }
+                        // }
                     }
                 }
                 break;
