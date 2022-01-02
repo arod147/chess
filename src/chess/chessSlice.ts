@@ -133,9 +133,9 @@ export const chessSlice = createSlice({
         state.selectedPieceLocation = location.payload
         state.selectedPiece = piece
         //console.log('Slected piece and location: ' + state.selectedPiece + " " + state.selectedPieceLocation)
-        const legalMoves = new Piece().legalMoves(state.board, state.selectedPieceLocation, state.selectedPiece)
+        const moves = new Piece().moveGenerator(state.board, state.selectedPieceLocation, state.selectedPiece)
         //console.log('above pieces moves: ' + legalMoves)
-        state.possibleMoves = new Piece().pinnedLegalMoves(state.board, legalMoves, state.selectedPiece, state.selectedPieceLocation)
+        state.possibleMoves = new Piece().legalMoves(state.board, moves, state.selectedPiece, state.selectedPieceLocation)
         //console.log('above Pieces true legal moves ' + state.possibleMoves)
       }
       //console.log('Here are my selected piece moves: ' + state.possibleMoves)
@@ -158,12 +158,12 @@ export const chessSlice = createSlice({
       }
     },
     playerMove: (state, location: PayloadAction<number>) => {
-      state.possibleMoves.map(move => {
-        if(move === location.payload) {
-          state.desiredMove = location.payload
-        }
-        return move
+      const moveMatch =state.possibleMoves.find(move => {
+        return move === location.payload
       })
+      if(moveMatch != undefined) {
+        state.desiredMove = moveMatch
+      }
     },
     //this action may be deleted was created incase we need to reset these three states manually
     clear: (state) => {
@@ -197,7 +197,7 @@ export const chessSlice = createSlice({
         var pieceMoves: number[]
         var move: number| undefined
         if(piece !== 0 && pieceColor !== state.currentPlayer) {
-          pieceMoves = new Piece().legalMoves(state.board, square, piece)
+          pieceMoves = new Piece().moveGenerator(state.board, square, piece)
           const playerInCheck = pieceMoves.find(move => {
           const attackedPieceBinary = (state.board[move]).toString(2)
           const attackPieceType = attackedPieceBinary.substring(attackedPieceBinary.length-3)

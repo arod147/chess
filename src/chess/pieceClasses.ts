@@ -24,54 +24,44 @@ export class Piece {
     Black: number = 16
     White: number = 8
 
-    //returns our true legal moves
-    pinnedLegalMoves(board: number[], legalMoves: number[], selectedPiece: number, selectedLocation: number){
-        const selectedPieceBinary = (selectedPiece).toString(2)
-        const selectedPieceColor = selectedPieceBinary.length === 5 ? 'Black' : 'White'
-        const trueLegalMoves: number[] = []
-
-        //Checks to see if any of our legal moves result in putting our own king in check
-        legalMoves.forEach(move => {
+    //returns our legal moves
+    legalMoves(board: number[], moves: number[], selectedPiece: number, selectedLocation: number){
+        //Check to see if any of our moves result in putting our own king in check
+        return moves.filter(move => {
             //We create a copy of the current board to see if after executing this move we are in check
             const boardCopy = [...board]
+            const attackingPieces: {type: number, location: number}[] = []
             boardCopy[move] = selectedPiece
             boardCopy[selectedLocation] = new Piece().None
-            //Used to keep track of attacking pieces
-            const attackingPieces: {type: number, location: number}[] = []
-
+            
             //Get all our oppenents attacking pieces
             boardCopy.forEach((piece, sqaure) => {
-                if(piece !== 0) {
-                    const fullPieceBinary = (piece).toString(2)
-                    const pieceColor = fullPieceBinary.length === 5 ? 'Black' : 'White'
-                    if(pieceColor !== selectedPieceColor) {
-                            attackingPieces.push({type: piece, location: sqaure})
-                    }
+                const selectedPieceBinary = (selectedPiece).toString(2)
+                const selectedPieceColor = selectedPieceBinary.length === 5 ? 'Black' : 'White'
+                const fullPieceBinary = (piece).toString(2)
+                const pieceColor = fullPieceBinary.length === 5 ? 'Black' : 'White'
+                if(piece !== 0 && pieceColor !== selectedPieceColor) {
+                     attackingPieces.push({type: piece, location: sqaure})
                 }
             })
-            
             //See if any of our attacking pieces are attacking the king
             const x = attackingPieces.find(piece => {
-                const attackMoves = new Piece().legalMoves(boardCopy, piece.location, piece.type)
-                let attackedPieceBinary: string | null = null
-                let attackedPieceType: string | null = null
+                const attackingPieceMoves = new Piece().moveGenerator(boardCopy, piece.location, piece.type)
+                let attackedPieceType: string
 
-                const foundMove = attackMoves.find(move => {
+                const isKingInCheck = attackingPieceMoves.find(move => {
                     if(boardCopy[move] !== 0) {
-                        attackedPieceBinary = (boardCopy[move]).toString(2)
+                        const attackedPieceBinary = (boardCopy[move]).toString(2)
                         attackedPieceType = attackedPieceBinary.substring(attackedPieceBinary.length-3)
                     } 
                     //We return the move that is attacking our king
                     return attackedPieceType === '110'
                 })
-                return foundMove !== undefined
+                return isKingInCheck !== undefined
             })
             //Only add moves that dont result in self check 
-            if(x === undefined) {
-                trueLegalMoves.push(move)
-            }
+            return x === undefined
         })
-        return trueLegalMoves
     }
 
     PrecomputedMoveData() {
@@ -102,7 +92,7 @@ export class Piece {
 
     
 
-    legalMoves(board: number[], startSquare: number, selectedPiece: number): number[] {
+    moveGenerator(board: number[], startSquare: number, selectedPiece: number): number[] {
         const distanceToEdges: number[][] = this.PrecomputedMoveData()
         const possibleMoves: number[] = []
         const binary = (selectedPiece).toString(2)
