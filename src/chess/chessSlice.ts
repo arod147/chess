@@ -72,7 +72,7 @@ export const moveHandler = (location: number) : AppThunk =>
       clearInterval(currentInterval)
       console.log('Promise returned true')
       dispatch(move())
-      dispatch(updateCheck())
+      //dispatch(updateCheck())
       return true
     } 
     if(response.meta.requestStatus === 'rejected') {
@@ -173,8 +173,10 @@ export const chessSlice = createSlice({
       state.promotion = true
     },
     promotePawn: (state, piece: PayloadAction<number>) => {
-      state.board.find((currentPiece, square) => {
+      console.log('promote')
+      const pawn = state.board.map((currentPiece, square) => {
         const binary = (currentPiece).toString(2)
+        console.log(binary)
         const piece_color = binary.length === 5 ? binary.slice(2) : binary.slice(1) 
         if(square <= 7 && piece_color === '001') {
           state.board[square] = piece.payload

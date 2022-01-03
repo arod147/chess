@@ -74,57 +74,7 @@ export class Piece {
         })
 
     }
-    
-    // //returns our true legal moves
-    // pinnedLegalMoves(board: number[], legalMoves: number[], selectedPiece: number, selectedLocation: number){
-    //     const selectedPieceBinary = (selectedPiece).toString(2)
-    //     const selectedPieceColor = selectedPieceBinary.length === 5 ? 'Black' : 'White'
-    //     const trueLegalMoves: number[] = []
-
-    //     //Checks to see if any of our legal moves result in putting our own king in check
-    //     legalMoves.forEach(move => {
-    //         //We create a copy of the current board to see if after executing this move we are in check
-    //         const boardCopy = [...board]
-    //         boardCopy[move] = selectedPiece
-    //         boardCopy[selectedLocation] = new Piece().None
-    //         //Used to keep track of attacking pieces
-    //         const attackingPieces: {type: number, location: number}[] = []
-
-    //         //Get all our oppenents attacking pieces
-    //         boardCopy.forEach((piece, sqaure) => {
-    //             if(piece !== 0) {
-    //                 const fullPieceBinary = (piece).toString(2)
-    //                 const pieceColor = fullPieceBinary.length === 5 ? 'Black' : 'White'
-    //                 if(pieceColor !== selectedPieceColor) {
-    //                         attackingPieces.push({type: piece, location: sqaure})
-    //                 }
-    //             }
-    //         })
-            
-    //         //See if any of our attacking pieces are attacking the king
-    //         const x = attackingPieces.find(piece => {
-    //             const attackMoves = new Piece().legalMoves(boardCopy, piece.location, piece.type)
-    //             let attackedPieceBinary: string | null = null
-    //             let attackedPieceType: string | null = null
-
-    //             const foundMove = attackMoves.find(move => {
-    //                 if(boardCopy[move] !== 0) {
-    //                     attackedPieceBinary = (boardCopy[move]).toString(2)
-    //                     attackedPieceType = attackedPieceBinary.substring(attackedPieceBinary.length-3)
-    //                 } 
-    //                 //We return the move that is attacking our king
-    //                 return attackedPieceType === '110'
-    //             })
-    //             return foundMove !== undefined
-    //         })
-    //         //Only add moves that dont result in self check 
-    //         if(x === undefined) {
-    //             trueLegalMoves.push(move)
-    //         }
-    //     })
-    //     return trueLegalMoves
-    // }
-
+   
     // returns numbers of squares to the edge of the board per square
     PrecomputedMoveData() {
     const numSquaresToEdge: number[][] = []
