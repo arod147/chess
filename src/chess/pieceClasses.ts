@@ -70,7 +70,7 @@ export class Piece {
                 const enemyMoves = enemyPieceIndexies.map((location) => {
                     // accounts for if we capture the attacking piece without having to alter the enemyPieceIndexies array
                     if(location === move){
-                        return
+                        return []
                     }
                     return this.legalMoves(boardCopy, location, boardCopy[location], lastMove)
                 }).flat()
@@ -84,7 +84,7 @@ export class Piece {
                 }
             }
             // returns nothing if the move is invalid
-            return 
+            return []
         })
 
     }
