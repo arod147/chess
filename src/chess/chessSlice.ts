@@ -7,7 +7,7 @@ export interface State {
   board: number[]
   currentPlayer: 'White' | 'Black'
   selectedPiece: number | null
-  selectedPieceLocation: number | null
+  selectedPieceLocation: number | null 
   desiredMove: number | null
   possibleMoves: number[]
   promotion: boolean
@@ -34,6 +34,38 @@ export const createBoard = () => {
     })
   }
 }
+//note if a piece has no moves it returns a array with undefined
+export const cpuMoveHandler = () : AppThunk => {
+   return (dispatch: AppDispatch, getState) => {
+       const getAllCurrentCpuPieces = () => {
+        const myPieces: {type: number, location: number, moves: number[]}[] = []
+        getState().chess.board.forEach((piece, square) => {
+          const fullPieceBinary = (piece).toString(2)
+          const pieceColor = fullPieceBinary.length === 5 ? 'Black' : 'White'
+          if(piece !== 0 && pieceColor === getState().chess.currentPlayer) {
+            const currentMoves = new Piece().trueLegalMoves(getState().chess.board, square, piece)
+            const filterOutUndifined = currentMoves.filter(move => {return move !== undefined})
+            //console.log(currentMoves)
+            myPieces.push({type: piece, location: square, moves: filterOutUndifined})
+          }
+        })
+        console.log(myPieces)
+        return myPieces
+       }
+       const myPieces = getAllCurrentCpuPieces()
+      
+       const myNewPieces = myPieces.filter((object) => {
+        return object.moves.length > 0
+       })
+       const myPiece = myNewPieces[Math.floor(Math.random() * myNewPieces.length)]
+       //console.log(myPiece)
+       if(myPiece !== undefined) {
+        //dispatch(setCpuMove({piece: myPiece.type, pieceLocation: myPiece.location, move: myPiece.moves[Math.floor(Math.random() * myPiece.moves.length)]}))
+        dispatch(move())
+       }
+   }
+}
+
 //will be assigned setInterval to wait for player move, in global scope to be manipulated later
 let currentInterval: NodeJS.Timeout 
 
@@ -134,9 +166,13 @@ export const chessSlice = createSlice({
         state.selectedPiece = piece
         //console.log('Selected piece and location: ' + state.selectedPiece + " " + state.selectedPieceLocation)
         state.possibleMoves = new Piece().trueLegalMoves(state.board, state.selectedPieceLocation, state.selectedPiece)
-        //console.log('above Pieces true legal moves ' + state.possibleMoves)
       }
       //console.log('Here are my selected piece moves: ' + state.possibleMoves)
+    },
+    setCpuMove: (state, object: PayloadAction<{piece: number, pieceLocation: number, move: number}>) => {
+      state.selectedPiece = object.payload.piece
+      state.selectedPieceLocation = object.payload.pieceLocation
+      state.desiredMove = object.payload.move
     },
     move: (state) => {
       if(state.desiredMove !== null && state.selectedPiece !== null && state.selectedPieceLocation !== null) {
@@ -217,7 +253,7 @@ export const chessSlice = createSlice({
 }
 });
 
-export const { setPieces, setEmptyBoard, selectPiece, move, playerMove, promotePawn, clear, allowPromotion, updateCheck } = chessSlice.actions;
+export const { setPieces, setEmptyBoard, selectPiece, move, playerMove, promotePawn, clear, allowPromotion, updateCheck, setCpuMove  } = chessSlice.actions;
 
 export const selectBoard = (state: RootState) => state.chess.board
 export const selectCurrentPlayer = (state: RootState) => state.chess.currentPlayer

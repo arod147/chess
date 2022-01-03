@@ -44,7 +44,7 @@ export class Piece {
         // return an array of all legal moves
         return <number[]>selectedPieceMoves.map((move) => {
             const boardCopy = [...board]
-            console.log('piece on move tile = ' +boardCopy[move])
+            console.log('piece on move tile = ' + boardCopy[move])
             const pieceBinaryLength = boardCopy[move].toString(2).length
             const isWhitePiece = pieceBinaryLength > 1 ? pieceBinaryLength === 4 ? true : false : null
 
@@ -72,7 +72,7 @@ export class Piece {
             // returns nothing if the move is invalid
             return 
         })
-
+        
     }
    
     // returns numbers of squares to the edge of the board per square

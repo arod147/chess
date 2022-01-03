@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import './App.css';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import { 
+  cpuMoveHandler,
     createBoard, 
     selectCurrentPlayer, 
     setPieces } from './chess/chessSlice';
@@ -21,6 +22,9 @@ function App() {
 
   useEffect(() => {
     console.log(playerTurn + ' it is now your turn')
+    if(playerTurn === 'Black') {
+      setTimeout(() => {dispatch(cpuMoveHandler())}, 1000)
+    }
   }, [playerTurn])  
     
   return (
