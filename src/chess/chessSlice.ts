@@ -36,26 +36,34 @@ export const createBoard = () => {
     })
   }
 }
+
+const getPieceTypeAndColor = (num: number) => {
+  const binary = (num).toString(2) 
+  return {
+    type: binary.substring(binary.length-3),
+    color: binary.length === 5 ? 'Black' : 'White'
+  }
+}
+
+const getAllCpuPieces = (getState: RootState) => {
+    const myPieces: {type: number, location: number, moves: number[]}[] = []
+    getState.chess.board.forEach((piece, square) => {
+      const pieceDetails = getPieceTypeAndColor(piece)
+      if(piece !== 0 && pieceDetails.color === getState.chess.currentPlayer) {
+        const currentMoves = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove)
+        //const filterOutUndifined = currentMoves.filter(move => {return move !== undefined})
+        //console.log(currentMoves)
+        myPieces.push({type: piece, location: square, moves: currentMoves})
+      }
+    })
+    return myPieces
+  }
+
 //note if a piece has no moves it returns a array with undefined
 export const cpuMoveHandler = () : AppThunk => {
    return (dispatch: AppDispatch, getState) => {
-       const getAllCurrentCpuPieces = () => {
-        const myPieces: {type: number, location: number, moves: number[]}[] = []
-        getState().chess.board.forEach((piece, square) => {
-          const fullPieceBinary = (piece).toString(2)
-          const pieceColor = fullPieceBinary.length === 5 ? 'Black' : 'White'
-          if(piece !== 0 && pieceColor === getState().chess.currentPlayer) {
-            const currentMoves = new Piece().legalMoves(getState().chess.board, square, piece, getState().chess.lastMove)
-            const filterOutUndifined = currentMoves.filter(move => {return move !== undefined})
-            console.log(currentMoves)
-            myPieces.push({type: piece, location: square, moves: filterOutUndifined})
-          }
-        })
-        return myPieces
-       }
-       const myPieces = getAllCurrentCpuPieces()
-      
-       const myNewPieces = myPieces.filter((object) => {
+       const myCpuPieces = getAllCpuPieces(getState())
+       const myNewPieces = myCpuPieces.filter((object) => {
         return object.moves.length > 0
        })
        console.log(myNewPieces)
@@ -157,21 +165,16 @@ export const chessSlice = createSlice({
         }
       }
       console.log('board set with pieces')
-    },  
+    },
     selectPiece: (state, location: PayloadAction<number>) => {
       const piece = state.board[location.payload]
-      let binary = (piece).toString(2)
-      let pieceColor = binary.length === 5 ? 'Black' : 'White';
-      //Get possible moves for selected piece
-      if(pieceColor === state.currentPlayer){
+      const pieceDetails = getPieceTypeAndColor(piece)
+      if(pieceDetails.color === state.currentPlayer){
         state.selectedPieceLocation = location.payload
         state.selectedPiece = piece
-        //console.log('Selected piece and location: ' + state.selectedPiece + " " + state.selectedPieceLocation)
+        //Get possible moves for selected piece
         state.possibleMoves = new Piece().legalMoves(state.board, state.selectedPieceLocation, state.selectedPiece, state.lastMove)
-        
-        //console.log(new Piece().legalMoves(state.board, state.selectedPieceLocation, state.selectedPiece, state.lastMove))
       }
-      //console.log('Here are my selected piece moves: ' + state.possibleMoves)
     },
     setCpuMove: (state, object: PayloadAction<{piece: number, pieceLocation: number, move: number}>) => {
       state.selectedPiece = object.payload.piece
@@ -180,7 +183,6 @@ export const chessSlice = createSlice({
     },
     move: (state) => {
       if(state.desiredMove !== null && state.selectedPiece !== null && state.selectedPieceLocation !== null) {
-        console.log('moving piece')
         state.board[state.desiredMove] = state.selectedPiece
         state.board[state.selectedPieceLocation] = new Piece().None
         state.lastMove = state.desiredMove
@@ -204,26 +206,17 @@ export const chessSlice = createSlice({
         return move
       })
     },
-    //this action may be deleted was created incase we need to reset these three states manually
-    clear: (state) => {
-      state.selectedPiece = null
-      state.desiredMove = null
-      state.possibleMoves = []
-    },
     allowPromotion: (state) => {
       state.promotion = true
     },
     promotePawn: (state, piece: PayloadAction<number>) => {
-      console.log('promote')
-      const pawn = state.board.map((currentPiece, square) => {
-        const binary = (currentPiece).toString(2)
-        console.log(binary)
-        const piece_color = binary.length === 5 ? binary.slice(2) : binary.slice(1) 
-        if(square <= 7 && piece_color === '001') {
+      state.board.map((currentPiece, square) => {
+        const pieceDetails = getPieceTypeAndColor(currentPiece) 
+        if(square <= 7 && pieceDetails.type === '001') {
           state.board[square] = piece.payload
           state.promotion = false
         }
-        if(square > 55 && square <= 63 && piece_color === '001') {
+        if(square > 55 && square <= 63 && pieceDetails.type === '001') {
           state.board[square] = piece.payload
           state.promotion = false
         }
@@ -233,19 +226,17 @@ export const chessSlice = createSlice({
     //This action will check after each move to see if a player is in check
     updateCheck: (state) => {
       const isPlayerInCheck = state.board.find((piece, square) => {
-        const pieceBinary = (piece).toString(2)
-        const pieceColor = pieceBinary.length === 5 ? 'Black' : 'White'
+        const pieceDetails = getPieceTypeAndColor(piece)
         var pieceMoves: number[]
         var move: number| undefined
-        if(piece !== 0 && pieceColor !== state.currentPlayer) {
+        //Check each enemy piece to see if the opposing king is in check
+        if(piece !== 0 && pieceDetails.color !== state.currentPlayer) {
           pieceMoves = new Piece().legalMoves(state.board, square, piece, state.lastMove)
           const playerInCheck = pieceMoves.find(move => {
-          const attackedPieceBinary = (state.board[move]).toString(2)
-          const attackPieceType = attackedPieceBinary.substring(attackedPieceBinary.length-3)
-          return attackPieceType === '110'
+          const attackedPieceDetails = getPieceTypeAndColor(state.board[move])
+          return attackedPieceDetails.type === '110'
           })
           move = playerInCheck
-          console.log(playerInCheck)
         }
         return move !== undefined 
       })
@@ -258,7 +249,7 @@ export const chessSlice = createSlice({
 }
 });
 
-export const { setPieces, setEmptyBoard, selectPiece, move, playerMove, promotePawn, clear, allowPromotion, updateCheck, setCpuMove  } = chessSlice.actions;
+export const { setPieces, setEmptyBoard, selectPiece, move, playerMove, promotePawn, allowPromotion, updateCheck, setCpuMove  } = chessSlice.actions;
 
 export const selectBoard = (state: RootState) => state.chess.board
 export const selectCurrentPlayer = (state: RootState) => state.chess.currentPlayer

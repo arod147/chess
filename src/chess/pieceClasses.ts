@@ -88,7 +88,6 @@ export class Piece {
                 return element
             }
         })
-       
     }
    
     // returns numbers of squares to the edge of the board per square
