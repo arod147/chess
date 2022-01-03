@@ -42,7 +42,6 @@ export class Piece {
 
     // returns legal moves after accounting for checks and friendly pinned pieces
     legalMoves(board: number[], selectedLocation: number, selectedPiece: number, lastMove: number): number[]{
-        const binary = (selectedPiece).toString(2)
         const isSelectedPieceWhite = selectedPiece > 0 ? selectedPiece < this.Black ? true : false : null
         const enemyPieceIndexies: number[] = []
         const selectedPieceMoves = this.possibleMoves(board, selectedLocation, selectedPiece, lastMove)
@@ -83,7 +82,11 @@ export class Piece {
                     return move
                 }
             }
-            return
+            
+        }).filter((element) => {
+            if (element !== undefined){
+                return element
+            }
         })
        
     }
