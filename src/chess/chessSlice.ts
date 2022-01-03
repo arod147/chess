@@ -45,13 +45,12 @@ export const cpuMoveHandler = () : AppThunk => {
           const fullPieceBinary = (piece).toString(2)
           const pieceColor = fullPieceBinary.length === 5 ? 'Black' : 'White'
           if(piece !== 0 && pieceColor === getState().chess.currentPlayer) {
-            const currentMoves = new Piece().trueLegalMoves(getState().chess.board, square, piece, getState().chess.lastMove)
+            const currentMoves = new Piece().legalMoves(getState().chess.board, square, piece, getState().chess.lastMove)
             const filterOutUndifined = currentMoves.filter(move => {return move !== undefined})
-            //console.log(currentMoves)
+            console.log(currentMoves)
             myPieces.push({type: piece, location: square, moves: filterOutUndifined})
           }
         })
-        console.log(myPieces)
         return myPieces
        }
        const myPieces = getAllCurrentCpuPieces()
@@ -59,10 +58,11 @@ export const cpuMoveHandler = () : AppThunk => {
        const myNewPieces = myPieces.filter((object) => {
         return object.moves.length > 0
        })
+       console.log(myNewPieces)
        const myPiece = myNewPieces[Math.floor(Math.random() * myNewPieces.length)]
        //console.log(myPiece)
        if(myPiece !== undefined) {
-        //dispatch(setCpuMove({piece: myPiece.type, pieceLocation: myPiece.location, move: myPiece.moves[Math.floor(Math.random() * myPiece.moves.length)]}))
+        dispatch(setCpuMove({piece: myPiece.type, pieceLocation: myPiece.location, move: myPiece.moves[Math.floor(Math.random() * myPiece.moves.length)]}))
         dispatch(move())
        }
    }
@@ -167,8 +167,9 @@ export const chessSlice = createSlice({
         state.selectedPieceLocation = location.payload
         state.selectedPiece = piece
         //console.log('Selected piece and location: ' + state.selectedPiece + " " + state.selectedPieceLocation)
-        state.possibleMoves = new Piece().trueLegalMoves(state.board, state.selectedPieceLocation, state.selectedPiece, state.lastMove)
-        //console.log('above Pieces true legal moves ' + state.possibleMoves)
+        state.possibleMoves = new Piece().legalMoves(state.board, state.selectedPieceLocation, state.selectedPiece, state.lastMove)
+        
+        //console.log(new Piece().legalMoves(state.board, state.selectedPieceLocation, state.selectedPiece, state.lastMove))
       }
       //console.log('Here are my selected piece moves: ' + state.possibleMoves)
     },

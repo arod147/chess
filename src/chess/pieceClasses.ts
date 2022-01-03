@@ -41,11 +41,11 @@ export class Piece {
     // }
 
     // returns legal moves after accounting for checks and friendly pinned pieces
-    trueLegalMoves(board: number[], selectedLocation: number, selectedPiece: number, lastMove: number): number[]{
+    legalMoves(board: number[], selectedLocation: number, selectedPiece: number, lastMove: number): number[]{
         const binary = (selectedPiece).toString(2)
         const isSelectedPieceWhite = selectedPiece > 0 ? selectedPiece < this.Black ? true : false : null
         const enemyPieceIndexies: number[] = []
-        const selectedPieceMoves = this.legalMoves(board, selectedLocation, selectedPiece, lastMove)
+        const selectedPieceMoves = this.possibleMoves(board, selectedLocation, selectedPiece, lastMove)
 
         // find all enemy pieces
         board.forEach((piece, index) => {
@@ -72,7 +72,7 @@ export class Piece {
                     if(location === move){
                         return []
                     }
-                    return this.legalMoves(boardCopy, location, boardCopy[location], lastMove)
+                    return this.possibleMoves(boardCopy, location, boardCopy[location], lastMove)
                 }).flat()
 
                 const kingLocation = boardCopy.findIndex((piece) => {
@@ -83,10 +83,9 @@ export class Piece {
                     return move
                 }
             }
-            // returns nothing if the move is invalid
-            return []
+            return
         })
-        
+       
     }
    
     // returns numbers of squares to the edge of the board per square
@@ -115,9 +114,12 @@ export class Piece {
         }
         return numSquaresToEdge
     }
+    //BUG**********************
+    //Possible moves currently returns moves that should not exist I think this has to do with the order in which you push
+    //a new move to an array and then break.
 
     // returns piece moves, not including rules for check
-    legalMoves(board: number[], startSquare: number, selectedPiece: number, lastMove: number): number[] {
+    possibleMoves(board: number[], startSquare: number, selectedPiece: number, lastMove: number): number[] {
         const distanceToEdges: number[][] = this.PrecomputedMoveData()
         const possibleMoves: number[] = []
         const binary = (selectedPiece).toString(2)
@@ -219,7 +221,6 @@ export class Piece {
                         if(pieceOnTargetSquareColor === pieceColor) {
                             break;
                         }
-
                         if(pieceOnTargetSquareColor !== pieceColor && pieceOnTargetSquareColor !== 'None') {
                             break;
                         }
