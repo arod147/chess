@@ -24,48 +24,62 @@ export class Piece {
     Black: number = 16
     White: number = 8
 
-    // returns legal moves after accounting for checks and friendly pieces
-    trueLegalMoves(board: number[], selectedLocation: number, selectedPiece: number): number[]{
+    // handles en passant but cannot update the board if the player chooses enpassant
+    // enPassant(board: number[], selectedPiece: number, selectedLocation: number, lastMove: number, currentPlayer: 'White' | 'Black'){
+    //     const isWhite = currentPlayer === 'White'
+    //     const enPassantLocations: number[] = isWhite ? [24, 25, 26, 27, 28, 29, 30, 31] : [32, 33, 34, 35, 36, 37, 38, 39]
+
+    //     const currentSpace = enPassantLocations.indexOf(selectedLocation)
+    //     const lastMoveSpace = enPassantLocations.indexOf(lastMove)
+        
+    //     if((currentSpace+1 === lastMoveSpace || currentSpace-1 === lastMoveSpace)
+    //     && board[lastMove] === (isWhite ? (this.Pawn + this.Black) : (this.Pawn + this.White))){
+    //         if(selectedPiece === (isWhite ? (this.Pawn + this.White) : (this.Pawn + this.Black))){
+    //             return isWhite ? lastMove-8 : lastMove+8
+    //         }
+    //     }
+    // }
+
+    // returns legal moves after accounting for checks and friendly pinned pieces
+    trueLegalMoves(board: number[], selectedLocation: number, selectedPiece: number, lastMove: number): number[]{
         const binary = (selectedPiece).toString(2)
-        const isWhite = binary.length > 1 ? binary.length === 4 ? true : false : null
+        const isSelectedPieceWhite = selectedPiece > 0 ? selectedPiece < this.Black ? true : false : null
         const enemyPieceIndexies: number[] = []
-        const selectedPieceMoves = this.legalMoves(board, selectedLocation, selectedPiece)
+        const selectedPieceMoves = this.legalMoves(board, selectedLocation, selectedPiece, lastMove)
 
         // find all enemy pieces
-        for(let index = 0; index < 64; index++){
-            const pieceBinaryLength = board[index].toString(2).length
-            const isWhitePiece = pieceBinaryLength > 1 ? pieceBinaryLength === 4 ? true : false : null
-            if(isWhite !== isWhitePiece && isWhitePiece !== null){
+        board.forEach((piece, index) => {
+            const isTargetPieceWhite = piece > 0 ? piece < this.Black ? true : false : null
+            if(isSelectedPieceWhite !== isTargetPieceWhite && isTargetPieceWhite !== null){
                 enemyPieceIndexies.push(index)
             }
-        }
-
+        })
+            
         // play a move on the board, if the friendly king is not in check after that move the move is legal
         // return an array of all legal moves
         return <number[]>selectedPieceMoves.map((move) => {
             const boardCopy = [...board]
-            console.log('piece on move tile = ' +boardCopy[move])
-            const pieceBinaryLength = boardCopy[move].toString(2).length
-            const isWhitePiece = pieceBinaryLength > 1 ? pieceBinaryLength === 4 ? true : false : null
+            const targetPiece = boardCopy[move]
+            const isTargetPieceWhite = targetPiece > 0 ? targetPiece < this.Black ? true : false : null
 
-            if (isWhite !== isWhitePiece){
+            if (isSelectedPieceWhite !== isTargetPieceWhite){
                 boardCopy[selectedLocation] = this.None
                 boardCopy[move] = selectedPiece
 
                 // gathers all the enemy piece moves and checks if any of them include the friendly king
                 const enemyMoves = enemyPieceIndexies.map((location) => {
-                    // accounts for if we capture the attacking piece
-                    if(location === move && pieceBinaryLength > 1){
+                    // accounts for if we capture the attacking piece without having to alter the enemyPieceIndexies array
+                    if(location === move){
                         return
                     }
-                    return this.legalMoves(boardCopy, location, boardCopy[location])
+                    return this.legalMoves(boardCopy, location, boardCopy[location], lastMove)
                 }).flat()
 
-                const kingSpace = boardCopy.findIndex((piece) => {
-                    return piece === (isWhite ? 14 : 22)
+                const kingLocation = boardCopy.findIndex((piece) => {
+                    return piece === (isSelectedPieceWhite ? (this.King + this.White) : (this.King + this.Black))
                 })
 
-                if(!enemyMoves.includes(kingSpace)){
+                if(!enemyMoves.includes(kingLocation)){
                     return move
                 }
             }
@@ -102,9 +116,8 @@ export class Piece {
         return numSquaresToEdge
     }
 
-    
-    // returns piece move rules
-    legalMoves(board: number[], startSquare: number, selectedPiece: number): number[] {
+    // returns piece moves, not including rules for check
+    legalMoves(board: number[], startSquare: number, selectedPiece: number, lastMove: number): number[] {
         const distanceToEdges: number[][] = this.PrecomputedMoveData()
         const possibleMoves: number[] = []
         const binary = (selectedPiece).toString(2)
@@ -132,12 +145,25 @@ export class Piece {
                         let targetPiece = (board[boardSpace]).toString(2)
                         let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
 
+                        // NOTE: en passant testing
+                        // NOTE: moves properly but cannot get rid of the enemy pawn if player choose en passant
+                        // const enPassantLocations: number[] = isWhite ? [24, 25, 26, 27, 28, 29, 30, 31] : [32, 33, 34, 35, 36, 37, 38, 39]
+                        // const currentSpace = enPassantLocations.indexOf(startSquare)
+                        // const lastMoveSpace = enPassantLocations.indexOf(lastMove)
+                        
+                        // if((currentSpace+1 === lastMoveSpace || currentSpace-1 === lastMoveSpace)
+                        // && board[lastMove] === (isWhite ? (this.Pawn + this.Black) : (this.Pawn + this.White))){
+                        //     if(selectedPiece === (isWhite ? (this.Pawn + this.White) : (this.Pawn + this.Black))){
+                        //         possibleMoves.push(isWhite ? lastMove-8 : lastMove+8)
+                        //     }
+                        // } 
+
                         // prevents overflow issues for edge pawns
                         if ((distanceToEdges[boardSpace][1] + (isWhite ? 1 : -1)) === distanceToEdges[startSquare][1]
                         && pieceOnTargetSquareColor !== 'None'){
-                            possibleMoves.push(startSquare + (isWhite ? -pawnOffsets[i] : pawnOffsets[i]))                   
-                        
+                            possibleMoves.push(startSquare + (isWhite ? -pawnOffsets[i] : pawnOffsets[i]))                  
                         }
+                        
                     }
                 }
                 break;
@@ -148,11 +174,10 @@ export class Piece {
                     for (let j = 0; j < 2; j++){
                         let currentOffset = offsets[i][j]
                         if(board[startSquare + currentOffset] !== undefined){
-                            let targetPiece = (board[startSquare + currentOffset]).toString(2)
-                            let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
-                            
-                            if(distanceToEdges[startSquare+currentOffset][i]+2 === distanceToEdges[startSquare][i]){
-                                possibleMoves.push(startSquare+currentOffset)
+                            let targetSquare = startSquare + currentOffset
+                                                       
+                            if(distanceToEdges[targetSquare][i]+2 === distanceToEdges[startSquare][i]){
+                                possibleMoves.push(targetSquare)
                             }
                         }
                     }
@@ -229,10 +254,7 @@ export class Piece {
                 for(let directionIndex = 0; directionIndex < 8; directionIndex++) {
                     if(distanceToEdges[startSquare][directionIndex] !== 0) {
                         let targetSquare = startSquare + kingOffsets[directionIndex]
-                        let pieceOnTargetSquare = board[targetSquare];
-                        let targetPiece = (pieceOnTargetSquare).toString(2)
-                        let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
-                        
+
                         possibleMoves.push(targetSquare)
                     }
                 }
