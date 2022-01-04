@@ -1,4 +1,4 @@
-import {Piece} from "./pieceClasses"
+import {Piece} from "./pieceClass"
 
 // returns numbers of squares to the edge of the board per square
 export const PrecomputedMoveData = () => {

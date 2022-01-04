@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { useAppSelector } from '../app/hooks';
 import { RootState, AppDispatch, AppThunk } from '../app/store';
-import { Piece } from './pieceClasses';
+import { Piece } from './pieceClass';
 import {castle} from './pieceMethods'
 
 export interface State {
