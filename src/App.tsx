@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from './app/hooks';
 import { 
   cpuMoveHandler,
     createBoard, 
+    selectCpuColor, 
     selectCurrentPlayer, 
     setPieces } from './chess/chessSlice';
 import Chessboard from './chess/Components/Chessboard';
@@ -12,6 +13,7 @@ import Promotion from './chess/Promotion';
 function App() {
   const dispatch = useAppDispatch()
   const playerTurn = useAppSelector(selectCurrentPlayer)
+  const cpuColor = useAppSelector(selectCpuColor)
   
   useEffect(() => {
         dispatch(createBoard()).then(() => {
@@ -22,8 +24,8 @@ function App() {
 
   useEffect(() => {
     console.log(playerTurn + ' it is now your turn')
-    if(playerTurn === 'Black') {
-      setTimeout(() => {dispatch(cpuMoveHandler())}, 1000)
+    if(playerTurn === cpuColor) {
+      setTimeout(() => {dispatch(cpuMoveHandler())}, 5000)
     }
   }, [playerTurn])  
     

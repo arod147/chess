@@ -6,6 +6,8 @@ import { Piece } from './pieceClasses';
 export interface State {
   board: number[]
   currentPlayer: 'White' | 'Black'
+  humanColor: 'White' | 'Black' 
+  cpuColor: 'White' | 'Black'
   selectedPiece: number | null
   selectedPieceLocation: number | null 
   desiredMove: number | null
@@ -14,12 +16,13 @@ export interface State {
   check: boolean
   lastMove: number
   canCastle: boolean[]
-
 };
 
 const initialState: State = {
   board: new Array(64),
   currentPlayer: 'White',
+  humanColor: 'White',
+  cpuColor: 'Black',
   selectedPiece: null,
   selectedPieceLocation: null,
   desiredMove: null,
@@ -45,7 +48,7 @@ export const createBoard = () => {
   }
 }
 
-const getPieceTypeAndColor = (num: number) => {
+export const getPieceTypeAndColor = (num: number) => {
   const binary = (num).toString(2) 
   return {
     type: binary.substring(binary.length-3),
@@ -272,6 +275,8 @@ export const selectCurrentPieceLocation = (state: RootState) => state.chess.sele
 export const selectPossibleMoves = (state: RootState) => state.chess.possibleMoves
 export const selectPromotion = (state: RootState) => state.chess.promotion
 export const selectCheck = (state: RootState) => state.chess.check
+export const selectHumanColor = (state: RootState) => state.chess.humanColor
+export const selectCpuColor = (state: RootState) => state.chess.cpuColor
 
 export default chessSlice.reducer;
 
