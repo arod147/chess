@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState, AppDispatch, AppThunk } from '../app/store';
 import { Piece } from './pieceClasses';
+import {castle} from './pieceMethods'
 
 
 export interface State {
@@ -88,11 +89,7 @@ export const cpuMoveHandler = () : AppThunk => {
           pieceLocation: myRandomPiece.location, 
           move: myRandomPiece.moves[myRandomMove]
         }))
-<<<<<<< HEAD
-        dispatch(move())
-=======
         dispatch(movePiece())
->>>>>>> 8463f4d607687825b7ce3793c607414fcf9d815c
        }
    }
 }
@@ -224,7 +221,7 @@ export const chessSlice = createSlice({
         //handles castling
         if(state.selectedPiece === new Piece().King + (state.currentPlayer === 'White' ? new Piece().White : new Piece().Black)){
           if (state.desiredMove === state.selectedPieceLocation + 2 || state.desiredMove === state.selectedPieceLocation-2){
-            new Piece().castle(state.board, state.selectedPiece, state.desiredMove, state.canCastle)
+            castle(state.board, state.selectedPiece, state.desiredMove, state.canCastle)
           }
         }
 
@@ -306,13 +303,8 @@ export const {
   setPieces, 
   setEmptyBoard, 
   selectPiece, 
-<<<<<<< HEAD
-  move, 
-  playerMove, 
-=======
   movePiece,
   getPlayerSelectedMove, 
->>>>>>> 8463f4d607687825b7ce3793c607414fcf9d815c
   promotePawn, 
   allowPromotion, 
   updateCheck, 
