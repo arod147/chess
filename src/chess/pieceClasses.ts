@@ -24,22 +24,6 @@ export class Piece {
     Black: number = 16
     White: number = 8
 
-    // handles en passant but cannot update the board if the player chooses enpassant
-    // enPassant(board: number[], selectedPiece: number, selectedLocation: number, lastMove: number, currentPlayer: 'White' | 'Black'){
-    //     const isWhite = currentPlayer === 'White'
-    //     const enPassantLocations: number[] = isWhite ? [24, 25, 26, 27, 28, 29, 30, 31] : [32, 33, 34, 35, 36, 37, 38, 39]
-
-    //     const currentSpace = enPassantLocations.indexOf(selectedLocation)
-    //     const lastMoveSpace = enPassantLocations.indexOf(lastMove)
-        
-    //     if((currentSpace+1 === lastMoveSpace || currentSpace-1 === lastMoveSpace)
-    //     && board[lastMove] === (isWhite ? (this.Pawn + this.Black) : (this.Pawn + this.White))){
-    //         if(selectedPiece === (isWhite ? (this.Pawn + this.White) : (this.Pawn + this.Black))){
-    //             return isWhite ? lastMove-8 : lastMove+8
-    //         }
-    //     }
-    // }
-
     // returns legal moves after accounting for checks and friendly pinned pieces
     legalMoves(board: number[], selectedLocation: number, selectedPiece: number, lastMove: number): number[]{
         const isSelectedPieceWhite = selectedPiece > 0 ? selectedPiece < this.Black ? true : false : null
@@ -58,35 +42,28 @@ export class Piece {
         // return an array of all legal moves
         return <number[]>selectedPieceMoves.map((move) => {
             const boardCopy = [...board]
-            const targetPiece = boardCopy[move]
-            const isTargetPieceWhite = targetPiece > 0 ? targetPiece < this.Black ? true : false : null
 
-            if (isSelectedPieceWhite !== isTargetPieceWhite){
-                boardCopy[selectedLocation] = this.None
-                boardCopy[move] = selectedPiece
+            boardCopy[selectedLocation] = this.None
+            boardCopy[move] = selectedPiece
 
-                // gathers all the enemy piece moves and checks if any of them include the friendly king
-                const enemyMoves = enemyPieceIndexies.map((location) => {
-                    // accounts for if we capture the attacking piece without having to alter the enemyPieceIndexies array
-                    if(location === move){
-                        return []
-                    }
-                    return this.possibleMoves(boardCopy, location, boardCopy[location], lastMove)
-                }).flat()
-
-                const kingLocation = boardCopy.findIndex((piece) => {
-                    return piece === (isSelectedPieceWhite ? (this.King + this.White) : (this.King + this.Black))
-                })
-
-                if(!enemyMoves.includes(kingLocation)){
-                    return move
+            // gathers all the enemy piece moves and checks if any of them include the friendly king
+            const enemyMoves = enemyPieceIndexies.map((location) => {
+                // accounts for if we capture the attacking piece without having to alter the enemyPieceIndexies array
+                if(location === move){
+                    return []
                 }
+                return this.possibleMoves(boardCopy, location, boardCopy[location], lastMove)
+            }).flat()
+
+            const kingLocation = boardCopy.findIndex((piece) => {
+                return piece === (isSelectedPieceWhite ? (this.King + this.White) : (this.King + this.Black))
+            })
+
+            if(!enemyMoves.includes(kingLocation)){
+                return move
             }
             
-        }).filter((element) => {
-            if (element !== undefined){
-                return element
-            }
+            
         })
     }
    
@@ -151,21 +128,22 @@ export class Piece {
 
                         // NOTE: en passant testing
                         // NOTE: moves properly but cannot get rid of the enemy pawn if player choose en passant
-                        // const enPassantLocations: number[] = isWhite ? [24, 25, 26, 27, 28, 29, 30, 31] : [32, 33, 34, 35, 36, 37, 38, 39]
-                        // const currentSpace = enPassantLocations.indexOf(startSquare)
-                        // const lastMoveSpace = enPassantLocations.indexOf(lastMove)
+                        const enPassantLocations: number[] = isWhite ? [24, 25, 26, 27, 28, 29, 30, 31] : [32, 33, 34, 35, 36, 37, 38, 39]
+                        const currentSpace = enPassantLocations.indexOf(startSquare)
+                        const lastMoveSpace = enPassantLocations.indexOf(lastMove)
                         
-                        // if((currentSpace+1 === lastMoveSpace || currentSpace-1 === lastMoveSpace)
-                        // && board[lastMove] === (isWhite ? (this.Pawn + this.Black) : (this.Pawn + this.White))){
-                        //     if(selectedPiece === (isWhite ? (this.Pawn + this.White) : (this.Pawn + this.Black))){
-                        //         possibleMoves.push(isWhite ? lastMove-8 : lastMove+8)
-                        //     }
-                        // } 
+                        if((currentSpace+1 === lastMoveSpace || currentSpace-1 === lastMoveSpace)
+                        && board[lastMove] === (isWhite ? (this.Pawn + this.Black) : (this.Pawn + this.White))){
+                            if(selectedPiece === (isWhite ? (this.Pawn + this.White) : (this.Pawn + this.Black))){
+                                possibleMoves.push(isWhite ? lastMove-8 : lastMove+8)
+                            }
+                        } 
 
                         // prevents overflow issues for edge pawns
-                        if ((distanceToEdges[boardSpace][1] + (isWhite ? 1 : -1)) === distanceToEdges[startSquare][1]
-                        && pieceOnTargetSquareColor !== 'None'){
-                            possibleMoves.push(startSquare + (isWhite ? -pawnOffsets[i] : pawnOffsets[i]))                  
+                        if ((distanceToEdges[boardSpace][1] + (isWhite ? 1 : -1)) === distanceToEdges[startSquare][1]){
+                            if (pieceOnTargetSquareColor !== pieceColor && pieceOnTargetSquareColor !== 'None'){
+                                possibleMoves.push(startSquare + (isWhite ? -pawnOffsets[i] : pawnOffsets[i]))                   
+                            }
                         }
                         
                     }
@@ -178,10 +156,13 @@ export class Piece {
                     for (let j = 0; j < 2; j++){
                         let currentOffset = offsets[i][j]
                         if(board[startSquare + currentOffset] !== undefined){
-                            let targetSquare = startSquare + currentOffset
-                                                       
-                            if(distanceToEdges[targetSquare][i]+2 === distanceToEdges[startSquare][i]){
-                                possibleMoves.push(targetSquare)
+                            let targetPiece = (board[startSquare + currentOffset]).toString(2)
+                            let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
+                            
+                            if(distanceToEdges[startSquare+currentOffset][i]+2 === distanceToEdges[startSquare][i]){
+                                if(pieceOnTargetSquareColor !== pieceColor){
+                                    possibleMoves.push(startSquare+currentOffset)
+                                }
                             }
                         }
                     }
@@ -197,11 +178,11 @@ export class Piece {
                         let targetPiece = (pieceOnTargetSquare).toString(2)
                         let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
 
-                        possibleMoves.push(targetSquare)
-
                         if(pieceOnTargetSquareColor === pieceColor) {
                             break;
                         }
+
+                        possibleMoves.push(targetSquare)
 
                         if(pieceOnTargetSquareColor !== pieceColor && pieceOnTargetSquareColor !== 'None') {
                             break;
@@ -218,11 +199,12 @@ export class Piece {
                         let targetPiece = (board[targetSquare]).toString(2); // convert piece to binary
                         let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
 
-                        possibleMoves.push(targetSquare)
-
                         if(pieceOnTargetSquareColor === pieceColor) {
                             break;
                         }
+
+                        possibleMoves.push(targetSquare)
+
                         if(pieceOnTargetSquareColor !== pieceColor && pieceOnTargetSquareColor !== 'None') {
                             break;
                         }
@@ -240,11 +222,12 @@ export class Piece {
                         let targetPiece = (pieceOnTargetSquare).toString(2)
                         let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
     
-                        possibleMoves.push(targetSquare)
-
                         if(pieceOnTargetSquareColor === pieceColor) {
                             break;
                         }
+
+                        possibleMoves.push(targetSquare)
+
                         if(pieceOnTargetSquareColor !== pieceColor && pieceOnTargetSquareColor !== 'None') {
                             break;
                         }
@@ -257,8 +240,13 @@ export class Piece {
                 for(let directionIndex = 0; directionIndex < 8; directionIndex++) {
                     if(distanceToEdges[startSquare][directionIndex] !== 0) {
                         let targetSquare = startSquare + kingOffsets[directionIndex]
-
-                        possibleMoves.push(targetSquare)
+                        let pieceOnTargetSquare = board[targetSquare];
+                        let targetPiece = (pieceOnTargetSquare).toString(2)
+                        let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
+                        
+                        if(pieceOnTargetSquareColor !== pieceColor) {
+                            possibleMoves.push(targetSquare)
+                        }
                     }
                 }
                 break;
