@@ -51,6 +51,32 @@ export const castle = (board: number[], selectedPiece: number, desiredMove: numb
     }
 }
 
+export const castleMovesAvailable = (board: number[], isCurrentPlayerWhite: boolean, enemyMoves: number[], canCastle: boolean[]) => {
+    const legalCastleMoves: number[] = []
+    for(let castleSide = 0; castleSide < 2; castleSide++){ // castleSide = 0 is kingside, castleSide 1 = queenside
+        if (canCastle[castleSide + (isCurrentPlayerWhite ? 2 : 0)]){
+            // spaces that need to be empty to castle
+            const kingSideSpaces = isCurrentPlayerWhite ? [61,62]:[5, 6]
+            const queenSideSpaces = isCurrentPlayerWhite ? [57,58,59]:[1, 2, 3]
+
+            // indexies account for king's side castle space and then queen's side space
+            const whiteCastleSpaces = [62, 58] 
+            const blackCastleSpaces = [6, 2] 
+
+            // making sure every space between king and rook (either queen or king side) is empty
+            // and ensures theres no checks cutting off
+            if (castleSide === 0 ? kingSideSpaces.every((spaceIndex) => {
+                return (board[spaceIndex] === new Piece().None && !enemyMoves.includes(spaceIndex))}) 
+            : queenSideSpaces.every((spaceIndex) => {
+                return board[spaceIndex] === new Piece().None && !enemyMoves.includes(spaceIndex)
+            })){
+                legalCastleMoves.push(isCurrentPlayerWhite ? whiteCastleSpaces[castleSide] : blackCastleSpaces[castleSide])
+            }
+        }
+    }
+    return legalCastleMoves
+}
+
 export const findAllEnemyPieces = (board: number[], isCurrentPlayerWhite: boolean) => {
     const enemyPieceLocations: number[] = []
     board.forEach((piece, index) => {
