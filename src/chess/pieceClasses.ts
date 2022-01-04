@@ -50,7 +50,6 @@ export class Piece {
                 enemyPieceLocations.push(index)
             }
         })
-
         return enemyPieceLocations
     }
 
@@ -144,6 +143,7 @@ export class Piece {
 
     // returns piece moves, not including rules for check
     possibleMoves(board: number[], startSquare: number, selectedPiece: number, lastMove: number): number[] {
+
         const distanceToEdges: number[][] = this.PrecomputedMoveData()
         const possibleMoves: number[] = []
         const binary = (selectedPiece).toString(2)
@@ -300,6 +300,5 @@ export class Piece {
 
     //Return all our possible moves for given piece    
     return possibleMoves
-
     }// end of legalMoves
 }
