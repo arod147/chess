@@ -7,7 +7,7 @@ import {
     selectCurrentPieceLocation,
     selectCheck,
     selectCurrentPlayer, 
-    playerMove, 
+    getPlayerSelectedMove, 
     selectPossibleMoves,
     getPieceTypeAndColor,
     selectHumanColor,
@@ -70,11 +70,11 @@ const Chessboard = () => {
                   dispatch(moveHandler(square))
                 }
                 if(selectedPiece !== null) {
-                  dispatch(playerMove(square))
+                  dispatch(getPlayerSelectedMove(square))
                 }
               } else {
                 if(selectedPiece !== null) {
-                  dispatch(playerMove(square))
+                  dispatch(getPlayerSelectedMove(square))
                 }
               }
             }}>
@@ -85,7 +85,7 @@ const Chessboard = () => {
       return <Tile key={square} tileColor={backGroundColor}
       onClick={() =>{
         if(selectedPiece !== null){
-          dispatch(playerMove(square))
+          dispatch(getPlayerSelectedMove(square))
         }
       }} 
       >
