@@ -37,7 +37,7 @@ const initialState: State = {
   // 1: white's kingside
   // 2: black's queenside
   // 3: black's kingside
-  canCastle: [true, true, true, true] 
+  canCastle: [true, true, true, true]
 };
 
 export const createBoard = () => {
@@ -88,7 +88,11 @@ export const cpuMoveHandler = () : AppThunk => {
           pieceLocation: myRandomPiece.location, 
           move: myRandomPiece.moves[myRandomMove]
         }))
+<<<<<<< HEAD
         dispatch(move())
+=======
+        dispatch(movePiece())
+>>>>>>> 8463f4d607687825b7ce3793c607414fcf9d815c
        }
    }
 }
@@ -130,7 +134,7 @@ export const moveHandler = (location: number) : AppThunk =>
     if(response.meta.requestStatus === 'fulfilled') {
       clearInterval(currentInterval)
       console.log('Promise returned true')
-      dispatch(move())
+      dispatch(movePiece())
       //dispatch(updateCheck())
       return true
     } 
@@ -161,8 +165,6 @@ export const chessSlice = createSlice({
       }
     },
     setPieces: (state) => {
-      for(let i = 0; i < state.board.length; i++) {
-        if(i === 0) {
           state.board[0] = new Piece().Rook | new Piece().Black
           state.board[1] = new Piece().Knight | new Piece().Black
           state.board[2] = new Piece().Bishop | new Piece().Black
@@ -171,7 +173,15 @@ export const chessSlice = createSlice({
           state.board[5] = new Piece().Bishop | new Piece().Black
           state.board[6] = new Piece().Knight | new Piece().Black
           state.board[7] = new Piece().Rook | new Piece().Black
-        }
+          state.board[56] = new Piece().Rook | new Piece().White
+          state.board[57] = new Piece().Knight | new Piece().White
+          state.board[58] = new Piece().Bishop | new Piece().White
+          state.board[59] = new Piece().Queen | new Piece().White
+          state.board[60] = new Piece().King | new Piece().White
+          state.board[61] = new Piece().Bishop | new Piece().White
+          state.board[62] = new Piece().Knight | new Piece().White
+          state.board[63] = new Piece().Rook | new Piece().White
+      for(let i = 8; i < 56; i++) {
         if(i >= 8 && i < 16) {
           state.board[i] = new Piece().Pawn | new Piece().Black
         }
@@ -181,18 +191,9 @@ export const chessSlice = createSlice({
         if(i >= 48 && i < 56) {
           state.board[i] = new Piece().Pawn | new Piece().White
         }
-        if(i === 56) {
-          state.board[56] = new Piece().Rook | new Piece().White
-          state.board[57] = new Piece().Knight | new Piece().White
-          state.board[58] = new Piece().Bishop | new Piece().White
-          state.board[59] = new Piece().Queen | new Piece().White
-          state.board[60] = new Piece().King | new Piece().White
-          state.board[61] = new Piece().Bishop | new Piece().White
-          state.board[62] = new Piece().Knight | new Piece().White
-          state.board[63] = new Piece().Rook | new Piece().White
-        }
       }
-    },
+    }
+    ,
     selectPiece: (state, location: PayloadAction<number>) => {
       const piece = state.board[location.payload]
       const pieceDetails = getPieceTypeAndColor(piece)
@@ -209,7 +210,7 @@ export const chessSlice = createSlice({
       state.selectedPieceLocation = object.payload.pieceLocation
       state.desiredMove = object.payload.move
     },
-    move: (state) => {
+    movePiece: (state) => {
       if(state.desiredMove !== null && state.selectedPiece !== null && state.selectedPieceLocation !== null) {
         
         // handles enPassant
@@ -217,18 +218,15 @@ export const chessSlice = createSlice({
         if(state.lastMove === state.desiredMove + (state.currentPlayer === 'White' ? 8 : -8)
         && state.selectedPiece === new Piece().Pawn + (state.currentPlayer === 'White' ? new Piece().White 
         : new Piece().Black)){
-
           state.board[state.lastMove] = new Piece().None
-
         }
 
         //handles castling
         if(state.selectedPiece === new Piece().King + (state.currentPlayer === 'White' ? new Piece().White : new Piece().Black)){
-          if (state.desiredMove === state.selectedPieceLocation +2 || state.desiredMove === state.selectedPieceLocation-2){
-            new Piece().castle(state.board, state.selectedPieceLocation, state.selectedPiece, state.desiredMove, state.canCastle)
+          if (state.desiredMove === state.selectedPieceLocation + 2 || state.desiredMove === state.selectedPieceLocation-2){
+            new Piece().castle(state.board, state.selectedPiece, state.desiredMove, state.canCastle)
           }
         }
-
 
         state.board[state.desiredMove] = state.selectedPiece
         state.board[state.selectedPieceLocation] = new Piece().None
@@ -247,7 +245,7 @@ export const chessSlice = createSlice({
         }
       }
     },
-    playerMove: (state, location: PayloadAction<number>) => {
+    getPlayerSelectedMove: (state, location: PayloadAction<number>) => {
       state.possibleMoves.map(move => {
         if(move === location.payload) {
           state.desiredMove = location.payload
@@ -308,8 +306,13 @@ export const {
   setPieces, 
   setEmptyBoard, 
   selectPiece, 
+<<<<<<< HEAD
   move, 
   playerMove, 
+=======
+  movePiece,
+  getPlayerSelectedMove, 
+>>>>>>> 8463f4d607687825b7ce3793c607414fcf9d815c
   promotePawn, 
   allowPromotion, 
   updateCheck, 
