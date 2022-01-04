@@ -87,23 +87,25 @@ export class Piece {
         })
 
         // adds castling moves (if available) to trueLegalMoves array
-        for(let castleSide = 0; castleSide < 2; castleSide++){
-            if (canCastle[castleSide + (isSelectedPieceWhite ? 2 : 0)]){
-                // spaces that need to be empty to castle
-                const kingSideSpaces = isSelectedPieceWhite ? [61,62]:[5, 6]
-                const queenSideSpaces = isSelectedPieceWhite ? [57,58,59]:[1, 2, 3]
+        if(selectedPiece === this.King + (isSelectedPieceWhite ? this.White : this.Black)){
+            for(let castleSide = 0; castleSide < 2; castleSide++){
+                if (canCastle[castleSide + (isSelectedPieceWhite ? 2 : 0)]){
+                    // spaces that need to be empty to castle
+                    const kingSideSpaces = isSelectedPieceWhite ? [61,62]:[5, 6]
+                    const queenSideSpaces = isSelectedPieceWhite ? [57,58,59]:[1, 2, 3]
 
-                // indexies account for king's side castle space and then queen's side space
-                const whiteCastleSpaces = [62, 58] 
-                const blackCastleSpaces = [6, 2] 
+                    // indexies account for king's side castle space and then queen's side space
+                    const whiteCastleSpaces = [62, 58] 
+                    const blackCastleSpaces = [6, 2] 
 
-                // making sure every space between king and rook (either queen or king side) is empty
-                if (castleSide === 0 ? kingSideSpaces.every((spaceIndex) => {
-                    return (board[spaceIndex] === this.None && !enemyMoves.includes(spaceIndex))}) 
-                : queenSideSpaces.every((spaceIndex) => {
-                    return board[spaceIndex] === this.None && !enemyMoves.includes(spaceIndex)
-                })){
-                    trueLegalMoves.push(isSelectedPieceWhite ? whiteCastleSpaces[castleSide] : blackCastleSpaces[castleSide])
+                    // making sure every space between king and rook (either queen or king side) is empty
+                    if (castleSide === 0 ? kingSideSpaces.every((spaceIndex) => {
+                        return (board[spaceIndex] === this.None && !enemyMoves.includes(spaceIndex))}) 
+                    : queenSideSpaces.every((spaceIndex) => {
+                        return board[spaceIndex] === this.None && !enemyMoves.includes(spaceIndex)
+                    })){
+                        trueLegalMoves.push(isSelectedPieceWhite ? whiteCastleSpaces[castleSide] : blackCastleSpaces[castleSide])
+                    }
                 }
             }
         }
