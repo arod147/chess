@@ -228,14 +228,16 @@ export const chessSlice = createSlice({
         state.board[state.selectedPieceLocation] = new Piece().None
         state.lastMove = state.desiredMove
         // Reset
-        if(state.currentPlayer === 'White') {
-          state.currentPlayer = 'Black'
-          state.selectedPiece = null
-          state.desiredMove = null
-        } else {
-          state.currentPlayer = 'White'
-          state.selectedPiece = null
-          state.desiredMove = null
+        if(state.promotion !== true) {
+          if(state.currentPlayer === 'White') {
+            state.currentPlayer = 'Black'
+            state.selectedPiece = null
+            state.desiredMove = null
+          } else {
+            state.currentPlayer = 'White'
+            state.selectedPiece = null
+            state.desiredMove = null
+          }
         }
       }
     },
@@ -256,10 +258,16 @@ export const chessSlice = createSlice({
         if(square <= 7 && pieceDetails.type === '001') {
           state.board[square] = piece.payload
           state.promotion = false
+          state.currentPlayer = 'White'
+          state.selectedPiece = null
+          state.desiredMove = null
         }
         if(square > 55 && square <= 63 && pieceDetails.type === '001') {
           state.board[square] = piece.payload
           state.promotion = false
+          state.currentPlayer = 'Black'
+          state.selectedPiece = null
+          state.desiredMove = null
         }
         return currentPiece
       })
