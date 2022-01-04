@@ -181,13 +181,11 @@ export const chessSlice = createSlice({
     },
     move: (state) => {
       if(state.desiredMove !== null && state.selectedPiece !== null && state.selectedPieceLocation !== null) {
-        console.log('last move ' + state.lastMove)
-        console.log('current player ' + state.currentPlayer)
-        console.log('desired move  ' + state.desiredMove)
+        
         // handles enPassant
         if(state.lastMove === state.desiredMove + (state.currentPlayer === 'White' ? 8 : -8)
-        && state.selectedPiece === new Piece().Pawn + (state.currentPlayer === 'White' ? new Piece().White : new Piece().Black)){
-          console.log('inb')
+        && state.selectedPiece === new Piece().Pawn + (state.currentPlayer === 'White' ? new Piece().White 
+        : new Piece().Black)){
           state.board[state.lastMove] = new Piece().None
         }
 
