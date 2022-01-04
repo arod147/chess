@@ -58,22 +58,22 @@ export const getPieceTypeAndColor = (num: number) => {
   }
 }
 
-const getAllCpuPieces = (getState: RootState) => {
-    const myPieces: {type: number, location: number, moves: number[]}[] = []
+const getAllCpuPiecesDetails = (getState: RootState) => {
+    const cpuPieces: {type: number, location: number, moves: number[]}[] = []
      getState.chess.board.forEach((piece, square) => {
        const pieceDetails = getPieceTypeAndColor(piece)
        if(piece !== 0 && pieceDetails.color === getState.chess.currentPlayer) {
-         const currentMoves = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove, getState.chess.canCastle)
-         myPieces.push({type: piece, location: square, moves: currentMoves})
+         const moveList = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove, getState.chess.canCastle)
+         cpuPieces.push({type: piece, location: square, moves: moveList})
        }
      })
-    return myPieces
+    return cpuPieces
   }
 
 //note if a piece has no moves it returns a array with undefined
 export const cpuMoveHandler = () : AppThunk => {
    return (dispatch: AppDispatch, getState) => {
-       const myCpuPieces = getAllCpuPieces(getState())
+       const myCpuPieces = getAllCpuPiecesDetails(getState())
        const myNewPieces = myCpuPieces.filter((object) => {
         return object.moves.length > 0
        })
@@ -87,7 +87,7 @@ export const cpuMoveHandler = () : AppThunk => {
    }
 }
 
-//will be assigned setInterval to wait for player move, in global scope to be manipulated later
+//will be assigned setInterval to wait for the player move, in global scope to be manipulated later
 let currentInterval: NodeJS.Timeout 
 
 export const moveFinder = createAsyncThunk<
@@ -98,8 +98,7 @@ export const moveFinder = createAsyncThunk<
   ('moveFinder', 
     async (location, thunkApi) =>  {
       thunkApi.dispatch(selectPiece(location))
-
-      const pieceSelected = new Promise<boolean>((resolve, reject) => {
+      const waitingForMove = new Promise<boolean>((resolve, reject) => {
         if(thunkApi.getState().chess.selectedPiece != null) {
           clearInterval(currentInterval)
           currentInterval = setInterval(() => {
@@ -113,7 +112,7 @@ export const moveFinder = createAsyncThunk<
           reject(false)
         }
       })
-      const move = await pieceSelected
+      const move = await waitingForMove
       return move
     }
   )
@@ -186,7 +185,6 @@ export const chessSlice = createSlice({
           state.board[63] = new Piece().Rook | new Piece().White
         }
       }
-      console.log('board set with pieces')
     },
     selectPiece: (state, location: PayloadAction<number>) => {
       const piece = state.board[location.payload]
