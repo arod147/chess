@@ -3,6 +3,32 @@
     padding: 30px;
 }
 
+.flipBoard {
+    width: 560px;
+    height: 560px;
+    display: flex;
+    flex-wrap: wrap;
+    -webkit-transform: scaleY(-1);
+    transform: scaleY(-1);
+}
+
+.flipBoard div {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flipBoard div .piece {
+    background-repeat: no-repeat;
+    background-size: 70px;
+    background-position: center center;
+    transition: 100ms;
+    -webkit-transform: scaleY(-1);
+    transform: scaleY(-1);
+}
+
 .game {
     width: 560px;
     height: 560px;
@@ -16,6 +42,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.piece {
+    background-repeat: no-repeat;
+    background-size: 70px;
+    background-position: center center;
+    transition: 100ms;
+}
+
+.piece:hover {
+    background-repeat: no-repeat;
+    background-size: 78px;
 }
 
 .highlight {
@@ -36,18 +74,6 @@
 
 .check {
     background-color: lightcoral;
-}
-
-.piece {
-    background-repeat: no-repeat;
-    background-size: 70px;
-    background-position: center center;
-    transition: 100ms;
-}
-
-.piece:hover {
-    background-repeat: no-repeat;
-    background-size: 78px;
 }
 
 #promoContainer {

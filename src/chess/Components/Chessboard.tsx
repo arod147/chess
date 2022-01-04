@@ -25,10 +25,10 @@ const Chessboard = () => {
     const board = useAppSelector(selectBoard)
     const possibleMoves = useAppSelector(selectPossibleMoves)
     const inCheck = useAppSelector(selectCheck)
-
+    
     var currentRow = 0;
     const chessBoard = board.map((piece, square)=> {
-     const pieceDetails = dispatch(getPieceTypeAndColor(piece))
+    const pieceDetails = dispatch(getPieceTypeAndColor(piece))
     let moves = possibleMoves
     var backGroundColor = 'none'
     
@@ -93,7 +93,7 @@ const Chessboard = () => {
     })
 
     return (
-        <div className="game">
+        <div className={humanColor === 'White' ? 'game' : 'flipBoard'}>
             {chessBoard}
         </div>
     )

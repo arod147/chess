@@ -5,9 +5,10 @@ import { Piece } from './pieceClasses';
 
 export interface State {
   board: number[]
+  gameStarted: boolean
   currentPlayer: 'White' | 'Black'
-  humanColor: 'White' | 'Black' 
-  cpuColor: 'White' | 'Black'
+  humanColor: 'White' | 'Black' | null
+  cpuColor: 'White' | 'Black' | null
   selectedPiece: number | null
   selectedPieceLocation: number | null 
   desiredMove: number | null
@@ -20,9 +21,10 @@ export interface State {
 
 const initialState: State = {
   board: new Array(64),
+  gameStarted: false,
   currentPlayer: 'White',
-  humanColor: 'White',
-  cpuColor: 'Black',
+  humanColor: null,
+  cpuColor: null,
   selectedPiece: null,
   selectedPieceLocation: null,
   desiredMove: null,
@@ -136,6 +138,17 @@ export const chessSlice = createSlice({
   name: 'chess',
   initialState,
   reducers: {
+    setPlayerColors: (state, color: PayloadAction<string>) => {
+      if(color.payload === 'White') {
+        state.humanColor = 'White'
+        state.cpuColor = 'Black'
+        state.gameStarted = true
+      } else {
+        state.humanColor = 'Black'
+        state.cpuColor = 'White'
+        state.gameStarted = true
+      }
+    },
     setEmptyBoard: (state) => {
       for(let i = 0; i < state.board.length; i++) {
         state.board[i] = new Piece().None
@@ -277,7 +290,7 @@ export const chessSlice = createSlice({
 }
 });
 
-export const { setPieces, setEmptyBoard, selectPiece, move, playerMove, promotePawn, allowPromotion, updateCheck, setCpuMove  } = chessSlice.actions;
+export const { setPieces, setEmptyBoard, selectPiece, move, playerMove, promotePawn, allowPromotion, updateCheck, setCpuMove, setPlayerColors  } = chessSlice.actions;
 
 export const selectBoard = (state: RootState) => state.chess.board
 export const selectCurrentPlayer = (state: RootState) => state.chess.currentPlayer
@@ -288,6 +301,7 @@ export const selectPromotion = (state: RootState) => state.chess.promotion
 export const selectCheck = (state: RootState) => state.chess.check
 export const selectHumanColor = (state: RootState) => state.chess.humanColor
 export const selectCpuColor = (state: RootState) => state.chess.cpuColor
+export const selectGameStated = (state: RootState) => state.chess.gameStarted
 
 export default chessSlice.reducer;
 
