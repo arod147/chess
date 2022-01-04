@@ -23,11 +23,11 @@ export class Piece {
 
     // returns legal moves after accounting for checks and friendly pinned pieces
     legalMoves(board: number[], selectedLocation: number, selectedPiece: number, lastMove: number, canCastle: boolean[]){
-        const isSelectedPieceWhite = selectedPiece < this.Black ? true : false
+        const isCurrentPlayerWhite: boolean = selectedPiece < this.Black ? true : false
         const selectedPieceMoves = this.possibleMoves(board, selectedLocation, selectedPiece, lastMove)
         let enemyMoves: number[] = []
         // find all enemy pieces
-        const enemyPieceLocations = _.findAllEnemyPieces(board, isSelectedPieceWhite)
+        const enemyPieceLocations = _.findAllEnemyPieces(board, isCurrentPlayerWhite)
             
         // play a move on the board, if the friendly king is not in check after that move the move is legal
         const trueLegalMoves = selectedPieceMoves.filter((move) => {
@@ -38,7 +38,7 @@ export class Piece {
             enemyMoves = _.getEnemyPieceMoves(boardCopy, enemyPieceLocations, move, lastMove)
 
             const kingLocation = boardCopy.findIndex((piece) => {
-                return piece === (isSelectedPieceWhite ? (this.King + this.White) : (this.King + this.Black))
+                return piece === (isCurrentPlayerWhite ? (this.King + this.White) : (this.King + this.Black))
             })
 
             return !enemyMoves.includes(kingLocation)
@@ -46,28 +46,10 @@ export class Piece {
         })
 
         // adds castling moves (if available) to trueLegalMoves array
-        if(selectedPiece === this.King + (isSelectedPieceWhite ? this.White : this.Black)){
-            for(let castleSide = 0; castleSide < 2; castleSide++){ // castleSide = 0 is kingside, castleSide 1 = queenside
-                if (canCastle[castleSide + (isSelectedPieceWhite ? 2 : 0)]){
-                    // spaces that need to be empty to castle
-                    const kingSideSpaces = isSelectedPieceWhite ? [61,62]:[5, 6]
-                    const queenSideSpaces = isSelectedPieceWhite ? [57,58,59]:[1, 2, 3]
-
-                    // indexies account for king's side castle space and then queen's side space
-                    const whiteCastleSpaces = [62, 58] 
-                    const blackCastleSpaces = [6, 2] 
-
-                    // making sure every space between king and rook (either queen or king side) is empty
-                    // and ensures theres no checks cutting off
-                    if (castleSide === 0 ? kingSideSpaces.every((spaceIndex) => {
-                        return (board[spaceIndex] === this.None && !enemyMoves.includes(spaceIndex))}) 
-                    : queenSideSpaces.every((spaceIndex) => {
-                        return board[spaceIndex] === this.None && !enemyMoves.includes(spaceIndex)
-                    })){
-                        trueLegalMoves.push(isSelectedPieceWhite ? whiteCastleSpaces[castleSide] : blackCastleSpaces[castleSide])
-                    }
-                }
-            }
+        if(selectedPiece === this.King + (isCurrentPlayerWhite ? this.White : this.Black)){
+            _.castleMovesAvailable(board, isCurrentPlayerWhite, enemyMoves, canCastle).forEach((move) =>{
+                trueLegalMoves.push(move)
+            })
         }
         return trueLegalMoves
     }
