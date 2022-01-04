@@ -24,8 +24,37 @@ export class Piece {
     Black: number = 16
     White: number = 8
 
+    // NOTE: not implemented or tested
+    // castle(board: number[], selectedLocation: number, selectedPiece: number, desiredMove: number, canCastle: boolean[]){
+    //     const isCurrentPlayerWhite = selectedPiece > 16 ? false : true 
+    //     const kingSideSpaces = [5, 6]
+    //     const queenSideSpaces = [1, 2, 3]
+
+    //     if(selectedPiece === this.King + (isCurrentPlayerWhite ? this.White : this.Black)
+    //     && selectedLocation === (isCurrentPlayerWhite ? 60 : 4)){
+
+    //         //kingside
+    //         if((desiredMove === (isCurrentPlayerWhite ? 62 : 6) && canCastle[(isCurrentPlayerWhite ? 0 : 2)])
+    //         && kingSideSpaces.forEach((spaceIndex) => {return board[spaceIndex] === this.None})){
+    //             board[desiredMove] = selectedPiece
+    //             board[desiredMove-1] = isCurrentPlayerWhite ? board[63] : board[7]
+    //             board[selectedLocation] = this.None
+    //             board[isCurrentPlayerWhite ? 63 : 7] = this.None
+    //         }
+    //         //queenside
+    //         if((desiredMove === (isCurrentPlayerWhite ? 58 : 2) && canCastle[(isCurrentPlayerWhite ? 1 : 3)])
+    //         && queenSideSpaces.forEach((spaceIndex) => {return board[spaceIndex] === this.None})){
+    //             board[desiredMove] = selectedPiece
+    //             board[desiredMove+1] = isCurrentPlayerWhite ? board[56] : board[0]
+    //             board[selectedLocation] = this.None
+    //             board[isCurrentPlayerWhite ? 63 : 7] = this.None
+    //         }
+            
+    //     }
+    // }
+
     // returns legal moves after accounting for checks and friendly pinned pieces
-    legalMoves(board: number[], selectedLocation: number, selectedPiece: number, lastMove: number): number[]{
+    legalMoves(board: number[], selectedLocation: number, selectedPiece: number, lastMove: number, canCastle: boolean[]): number[]{
         const isSelectedPieceWhite = selectedPiece > 0 ? selectedPiece < this.Black ? true : false : null
         const enemyPieceIndexies: number[] = []
         const selectedPieceMoves = this.possibleMoves(board, selectedLocation, selectedPiece, lastMove)
@@ -244,6 +273,7 @@ export class Piece {
                         let targetPiece = (pieceOnTargetSquare).toString(2)
                         let pieceOnTargetSquareColor = targetPiece.length > 1 ? targetPiece.length === 5 ? 'Black' : 'White' : 'None';
                         
+
                         if(pieceOnTargetSquareColor !== pieceColor) {
                             possibleMoves.push(targetSquare)
                         }
