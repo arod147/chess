@@ -58,13 +58,13 @@ export const getPieceTypeAndColor = (num: number) => {
 
 const getAllCpuPieces = (getState: RootState) => {
     const myPieces: {type: number, location: number, moves: number[]}[] = []
-    // getState.chess.board.forEach((piece, square) => {
-    //   const pieceDetails = getPieceTypeAndColor(piece)
-    //   if(piece !== 0 && pieceDetails.color === getState.chess.currentPlayer) {
-    //     const currentMoves = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove, getState.chess.canCastle)
-    //     myPieces.push({type: piece, location: square, moves: currentMoves})
-    //   }
-    // })
+     getState.chess.board.forEach((piece, square) => {
+       const pieceDetails = getPieceTypeAndColor(piece)
+       if(piece !== 0 && pieceDetails.color === getState.chess.currentPlayer) {
+         const currentMoves = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove, getState.chess.canCastle)
+         myPieces.push({type: piece, location: square, moves: currentMoves})
+       }
+     })
     return myPieces
   }
 
