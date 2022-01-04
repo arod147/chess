@@ -13,6 +13,8 @@ export interface State {
   promotion: boolean
   check: boolean
   lastMove: number
+  canCastle: boolean[]
+
 };
 
 const initialState: State = {
@@ -24,7 +26,13 @@ const initialState: State = {
   possibleMoves: [],
   promotion: false,
   check: false,
-  lastMove: 0
+  lastMove: 0,
+  // castle indexies follow order:
+  // 0: white's queenside
+  // 1: white's kingside
+  // 2: black's queenside
+  // 3: black's kingside
+  canCastle: [true, true, true, true] 
 };
 
 export const createBoard = () => {
@@ -50,7 +58,7 @@ const getAllCpuPieces = (getState: RootState) => {
     getState.chess.board.forEach((piece, square) => {
       const pieceDetails = getPieceTypeAndColor(piece)
       if(piece !== 0 && pieceDetails.color === getState.chess.currentPlayer) {
-        const currentMoves = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove)
+        const currentMoves = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove, getState.chess.canCastle)
         myPieces.push({type: piece, location: square, moves: currentMoves})
       }
     })
@@ -171,7 +179,7 @@ export const chessSlice = createSlice({
         state.selectedPieceLocation = location.payload
         state.selectedPiece = piece
         //Get possible moves for selected piece
-        state.possibleMoves = new Piece().legalMoves(state.board, state.selectedPieceLocation, state.selectedPiece, state.lastMove)
+        state.possibleMoves = new Piece().legalMoves(state.board, state.selectedPieceLocation, state.selectedPiece, state.lastMove, state.canCastle)
       }
     },
     setCpuMove: (state, object: PayloadAction<{piece: number, pieceLocation: number, move: number}>) => {
@@ -237,7 +245,7 @@ export const chessSlice = createSlice({
         var move: number| undefined
         //Check each enemy piece to see if the opposing king is in check
         if(piece !== 0 && pieceDetails.color !== state.currentPlayer) {
-          pieceMoves = new Piece().legalMoves(state.board, square, piece, state.lastMove)
+          pieceMoves = new Piece().legalMoves(state.board, square, piece, state.lastMove, state.canCastle)
           const playerInCheck = pieceMoves.find(move => {
           const attackedPieceDetails = getPieceTypeAndColor(state.board[move])
           return attackedPieceDetails.type === '110'
