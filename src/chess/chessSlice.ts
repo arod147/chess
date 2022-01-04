@@ -60,13 +60,13 @@ export const getPieceTypeAndColor = (num: number) => {
 
 const getAllCpuPiecesDetails = (getState: RootState) => {
     const cpuPieces: {type: number, location: number, moves: number[]}[] = []
-     getState.chess.board.forEach((piece, square) => {
-       const pieceDetails = getPieceTypeAndColor(piece)
-       if(piece !== 0 && pieceDetails.color === getState.chess.currentPlayer) {
-         const moveList = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove, getState.chess.canCastle)
-         cpuPieces.push({type: piece, location: square, moves: moveList})
-       }
-     })
+    getState.chess.board.forEach((piece, square) => {
+      const pieceDetails = getPieceTypeAndColor(piece)
+      if(piece !== 0 && pieceDetails.color === getState.chess.currentPlayer) {
+        const moveList = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove, getState.chess.canCastle)
+        cpuPieces.push({type: piece, location: square, moves: moveList})
+      }
+    })
     return cpuPieces
   }
 
@@ -78,10 +78,16 @@ export const cpuMoveHandler = () : AppThunk => {
         return object.moves.length > 0
        })
        console.log(myNewPieces)
-       const myPiece = myNewPieces[Math.floor(Math.random() * myNewPieces.length)]
+       const myRandomPiece = myNewPieces[Math.floor(Math.random() * myNewPieces.length)]
+       const myRandomMove = Math.floor(Math.random() * myRandomPiece.moves.length)
        //console.log(myPiece)
-       if(myPiece !== undefined) {
-        dispatch(setCpuMove({piece: myPiece.type, pieceLocation: myPiece.location, move: myPiece.moves[Math.floor(Math.random() * myPiece.moves.length)]}))
+       if(myRandomPiece !== undefined) {
+        dispatch(setCpuMove(
+          {
+          piece: myRandomPiece.type, 
+          pieceLocation: myRandomPiece.location, 
+          move: myRandomPiece.moves[myRandomMove]
+        }))
         dispatch(move())
        }
    }
@@ -98,6 +104,7 @@ export const moveFinder = createAsyncThunk<
   ('moveFinder', 
     async (location, thunkApi) =>  {
       thunkApi.dispatch(selectPiece(location))
+      
       const waitingForMove = new Promise<boolean>((resolve, reject) => {
         if(thunkApi.getState().chess.selectedPiece != null) {
           clearInterval(currentInterval)
@@ -194,6 +201,7 @@ export const chessSlice = createSlice({
         state.selectedPiece = piece
         //Get possible moves for selected piece
         state.possibleMoves = new Piece().legalMoves(state.board, state.selectedPieceLocation, state.selectedPiece, state.lastMove, state.canCastle)
+        console.log(state.possibleMoves)
       }
     },
     setCpuMove: (state, object: PayloadAction<{piece: number, pieceLocation: number, move: number}>) => {
@@ -252,7 +260,7 @@ export const chessSlice = createSlice({
     },
     promotePawn: (state, piece: PayloadAction<number>) => {
       state.board.map((currentPiece, square) => {
-        const pieceDetails = getPieceTypeAndColor(currentPiece) 
+        const pieceDetails = getPieceTypeAndColor(currentPiece)
         if(square <= 7 && pieceDetails.type === '001') {
           state.board[square] = piece.payload
           state.promotion = false
@@ -296,7 +304,18 @@ export const chessSlice = createSlice({
 }
 });
 
-export const { setPieces, setEmptyBoard, selectPiece, move, playerMove, promotePawn, allowPromotion, updateCheck, setCpuMove, setPlayerColors  } = chessSlice.actions;
+export const {
+  setPieces, 
+  setEmptyBoard, 
+  selectPiece, 
+  move, 
+  playerMove, 
+  promotePawn, 
+  allowPromotion, 
+  updateCheck, 
+  setCpuMove, 
+  setPlayerColors 
+} = chessSlice.actions;
 
 export const selectBoard = (state: RootState) => state.chess.board
 export const selectCurrentPlayer = (state: RootState) => state.chess.currentPlayer
