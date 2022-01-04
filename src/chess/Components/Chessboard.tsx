@@ -8,7 +8,10 @@ import {
     selectCheck,
     selectCurrentPlayer, 
     playerMove, 
-    selectPossibleMoves, } from '../chessSlice';
+    selectPossibleMoves,
+    getPieceTypeAndColor,
+    selectHumanColor,
+    selectCpuColor, } from '../chessSlice';
 import Tile from './Tiles';
 import Piece from './Piece';
 
@@ -17,13 +20,15 @@ const Chessboard = () => {
     const selectedPiece = useAppSelector(selectCurrentPiece)
     const selectedPieceLocation = useAppSelector(selectCurrentPieceLocation)
     const currentPlayer = useAppSelector(selectCurrentPlayer)
+    const humanColor = useAppSelector(selectHumanColor)
+    const cpuColor = useAppSelector(selectCpuColor)
     const board = useAppSelector(selectBoard)
     const possibleMoves = useAppSelector(selectPossibleMoves)
     const inCheck = useAppSelector(selectCheck)
 
-
     var currentRow = 0;
     const chessBoard = board.map((piece, square)=> {
+     const pieceDetails = dispatch(getPieceTypeAndColor(piece))
     let moves = possibleMoves
     var backGroundColor = 'none'
     
@@ -57,14 +62,20 @@ const Chessboard = () => {
         //Display our pieces on the board
         return <Tile key={square} tileColor={backGroundColor} 
             onClick={() =>{
-            if(selectedPiece === null ) {
-                dispatch(moveHandler(square))
-              }
-              if(selectedPiece !== null && square !== selectedPieceLocation) {
-                dispatch(moveHandler(square))
-              }
-              if(selectedPiece !== null) {
-                dispatch(playerMove(square))
+              if(pieceDetails.color === humanColor) {
+                if(selectedPiece === null ) {
+                  dispatch(moveHandler(square))
+                }
+                if(selectedPiece !== null && square !== selectedPieceLocation) {
+                  dispatch(moveHandler(square))
+                }
+                if(selectedPiece !== null) {
+                  dispatch(playerMove(square))
+                }
+              } else {
+                if(selectedPiece !== null) {
+                  dispatch(playerMove(square))
+                }
               }
             }}>
                 <Piece name={piece}/>
