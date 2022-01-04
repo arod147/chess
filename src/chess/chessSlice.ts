@@ -51,8 +51,6 @@ const getAllCpuPieces = (getState: RootState) => {
       const pieceDetails = getPieceTypeAndColor(piece)
       if(piece !== 0 && pieceDetails.color === getState.chess.currentPlayer) {
         const currentMoves = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove)
-        //const filterOutUndifined = currentMoves.filter(move => {return move !== undefined})
-        //console.log(currentMoves)
         myPieces.push({type: piece, location: square, moves: currentMoves})
       }
     })
@@ -183,6 +181,16 @@ export const chessSlice = createSlice({
     },
     move: (state) => {
       if(state.desiredMove !== null && state.selectedPiece !== null && state.selectedPieceLocation !== null) {
+        console.log('last move ' + state.lastMove)
+        console.log('current player ' + state.currentPlayer)
+        console.log('desired move  ' + state.desiredMove)
+        // handles enPassant
+        if(state.lastMove === state.desiredMove + (state.currentPlayer === 'White' ? 8 : -8)
+        && state.selectedPiece === new Piece().Pawn + (state.currentPlayer === 'White' ? new Piece().White : new Piece().Black)){
+          console.log('inb')
+          state.board[state.lastMove] = new Piece().None
+        }
+
         state.board[state.desiredMove] = state.selectedPiece
         state.board[state.selectedPieceLocation] = new Piece().None
         state.lastMove = state.desiredMove
