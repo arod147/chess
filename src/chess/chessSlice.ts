@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { useAppSelector } from '../app/hooks';
 import { RootState, AppDispatch, AppThunk } from '../app/store';
 import { Piece } from './pieceClasses';
+import {castle} from './pieceMethods'
 
 export interface State {
   board: number[]
@@ -64,13 +65,13 @@ export const getPieceTypeAndColor = (num: number) => {
 
 const getAllPieceDetails = (getState: RootState) => {
     const cpuPieces: {type: number, location: number, moves: number[]}[] = []
-     getState.chess.board.forEach((piece, square) => {
-       const pieceDetails = getPieceTypeAndColor(piece)
-       if(piece !== 0 && pieceDetails.color === getState.chess.currentPlayer) {
-         const moveList = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove, getState.chess.canCastle)
-         cpuPieces.push({type: piece, location: square, moves: moveList})
-       }
-     })
+    getState.chess.board.forEach((piece, square) => {
+      const pieceDetails = getPieceTypeAndColor(piece)
+      if(piece !== 0 && pieceDetails.color === getState.chess.currentPlayer) {
+        const moveList = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove, getState.chess.canCastle)
+        cpuPieces.push({type: piece, location: square, moves: moveList})
+      }
+    })
     return cpuPieces
 }
 
@@ -230,7 +231,7 @@ export const chessSlice = createSlice({
         //handles castling
         if(state.selectedPiece === new Piece().King + (state.currentPlayer === 'White' ? new Piece().White : new Piece().Black)){
           if (state.desiredMove === state.selectedPieceLocation + 2 || state.desiredMove === state.selectedPieceLocation-2){
-            new Piece().castle(state.board, state.selectedPiece, state.desiredMove, state.canCastle)
+            castle(state.board, state.selectedPiece, state.desiredMove, state.canCastle)
           }
         }
 
