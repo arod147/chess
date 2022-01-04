@@ -7,10 +7,6 @@
 // 48 49 50 51 52 53 54 55
 // 56 57 58 59 60 61 62 63
 
-// When pawns reaches opposite side of board error line 125 of pieceClass
-// When pawns at the left or right edge of the board reach the sqaure before the end of top or bottom of the board same error
-// Not to sure what is causes this error but a have determined that the problem lies within legal moves only for 
-// pawns all other pieces worked fine.
 export class Piece {
 
     None: number = 0
@@ -24,41 +20,39 @@ export class Piece {
     Black: number = 16
     White: number = 8
 
-    // NOTE: not implemented or tested
-    // castle(board: number[], selectedLocation: number, selectedPiece: number, desiredMove: number, canCastle: boolean[]){
-    //     const isCurrentPlayerWhite = selectedPiece > 16 ? false : true 
-    //     const kingSideSpaces = [5, 6]
-    //     const queenSideSpaces = [1, 2, 3]
-
-    //     if(selectedPiece === this.King + (isCurrentPlayerWhite ? this.White : this.Black)
-    //     && selectedLocation === (isCurrentPlayerWhite ? 60 : 4)){
-
-    //         //kingside
-    //         if((desiredMove === (isCurrentPlayerWhite ? 62 : 6) && canCastle[(isCurrentPlayerWhite ? 0 : 2)])
-    //         && kingSideSpaces.forEach((spaceIndex) => {return board[spaceIndex] === this.None})){
-    //             board[desiredMove] = selectedPiece
-    //             board[desiredMove-1] = isCurrentPlayerWhite ? board[63] : board[7]
-    //             board[selectedLocation] = this.None
-    //             board[isCurrentPlayerWhite ? 63 : 7] = this.None
-    //         }
-    //         //queenside
-    //         if((desiredMove === (isCurrentPlayerWhite ? 58 : 2) && canCastle[(isCurrentPlayerWhite ? 1 : 3)])
-    //         && queenSideSpaces.forEach((spaceIndex) => {return board[spaceIndex] === this.None})){
-    //             board[desiredMove] = selectedPiece
-    //             board[desiredMove+1] = isCurrentPlayerWhite ? board[56] : board[0]
-    //             board[selectedLocation] = this.None
-    //             board[isCurrentPlayerWhite ? 63 : 7] = this.None
-    //         }
+    castle(board: number[], selectedLocation: number, selectedPiece: number, desiredMove: number, canCastle: boolean[]){
+        const isCurrentPlayerWhite = selectedPiece > 16 ? false : true 
+        const kingSideSpaces = isCurrentPlayerWhite ? [61,62] : [5, 6]
+        const queenSideSpaces = isCurrentPlayerWhite ? [57,58,59] : [1, 2, 3]
+        
+        // checks if piece is king, might be redundant
+        if(selectedPiece === this.King + (isCurrentPlayerWhite ? this.White : this.Black)){
+            //king's side castling
+            if((desiredMove === (isCurrentPlayerWhite ? 62 : 6) && canCastle[(isCurrentPlayerWhite ? 0 : 2)])
+            && kingSideSpaces.every((spaceIndex) => {return board[spaceIndex] === this.None})){
+                board[desiredMove] = selectedPiece
+                board[desiredMove-1] = isCurrentPlayerWhite ? board[63] : board[7]
+                board[selectedLocation] = this.None
+                board[isCurrentPlayerWhite ? 63 : 7] = this.None
+            }
+            //queen's side castling
+            if((desiredMove === (isCurrentPlayerWhite ? 58 : 2) && canCastle[(isCurrentPlayerWhite ? 1 : 3)])
+            && queenSideSpaces.every((spaceIndex) => {return board[spaceIndex] === this.None})){
+                board[desiredMove] = selectedPiece
+                board[desiredMove+1] = isCurrentPlayerWhite ? board[56] : board[0]
+                board[selectedLocation] = this.None
+                board[isCurrentPlayerWhite ? 56 : 0] = this.None
+            }
             
-    //     }
-    // }
+        }
+    }
 
     // returns legal moves after accounting for checks and friendly pinned pieces
-    legalMoves(board: number[], selectedLocation: number, selectedPiece: number, lastMove: number, canCastle: boolean[]): number[]{
+    legalMoves(board: number[], selectedLocation: number, selectedPiece: number, lastMove: number, canCastle: boolean[]){
         const isSelectedPieceWhite = selectedPiece > 0 ? selectedPiece < this.Black ? true : false : null
         const enemyPieceIndexies: number[] = []
         const selectedPieceMoves = this.possibleMoves(board, selectedLocation, selectedPiece, lastMove)
-
+        let enemyMoves: number[] = []
         // find all enemy pieces
         board.forEach((piece, index) => {
             const isTargetPieceWhite = piece > 0 ? piece < this.Black ? true : false : null
@@ -68,15 +62,14 @@ export class Piece {
         })
             
         // play a move on the board, if the friendly king is not in check after that move the move is legal
-        // return an array of all legal moves
-        return <number[]>selectedPieceMoves.map((move) => {
+        const trueLegalMoves = selectedPieceMoves.map((move) => {
             const boardCopy = [...board]
 
             boardCopy[selectedLocation] = this.None
             boardCopy[move] = selectedPiece
 
             // gathers all the enemy piece moves and checks if any of them include the friendly king
-            const enemyMoves = enemyPieceIndexies.map((location) => {
+            enemyMoves = enemyPieceIndexies.map((location) => {
                 // accounts for if we capture the attacking piece without having to alter the enemyPieceIndexies array
                 if(location === move){
                     return []
@@ -91,9 +84,31 @@ export class Piece {
             if(!enemyMoves.includes(kingLocation)){
                 return move
             }
-            
-            
         })
+
+        // adds castling moves (if available) to trueLegalMoves array
+        for(let castleSide = 0; castleSide < 2; castleSide++){
+            if (canCastle[castleSide + (isSelectedPieceWhite ? 2 : 0)]){
+                // spaces that need to be empty to castle
+                const kingSideSpaces = isSelectedPieceWhite ? [61,62]:[5, 6]
+                const queenSideSpaces = isSelectedPieceWhite ? [57,58,59]:[1, 2, 3]
+
+                // indexies account for king's side castle space and then queen's side space
+                const whiteCastleSpaces = [62, 58] 
+                const blackCastleSpaces = [6, 2] 
+
+                // making sure every space between king and rook (either queen or king side) is empty
+                if (castleSide === 0 ? kingSideSpaces.every((spaceIndex) => {
+                    return (board[spaceIndex] === this.None && !enemyMoves.includes(spaceIndex))}) 
+                : queenSideSpaces.every((spaceIndex) => {
+                    return board[spaceIndex] === this.None && !enemyMoves.includes(spaceIndex)
+                })){
+                    trueLegalMoves.push(isSelectedPieceWhite ? whiteCastleSpaces[castleSide] : blackCastleSpaces[castleSide])
+                }
+            }
+        }
+
+        return <number[]>trueLegalMoves
     }
    
     // returns numbers of squares to the edge of the board per square
@@ -122,9 +137,6 @@ export class Piece {
         }
         return numSquaresToEdge
     }
-    //BUG**********************
-    //Possible moves currently returns moves that should not exist I think this has to do with the order in which you push
-    //a new move to an array and then break.
 
     // returns piece moves, not including rules for check
     possibleMoves(board: number[], startSquare: number, selectedPiece: number, lastMove: number): number[] {
