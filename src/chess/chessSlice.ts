@@ -1,8 +1,8 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { useAppSelector } from '../app/hooks';
 import { RootState, AppDispatch, AppThunk } from '../app/store';
 import { Piece } from './pieceClasses';
 import {castle} from './pieceMethods'
-
 
 export interface State {
   board: number[]
@@ -41,6 +41,10 @@ const initialState: State = {
   canCastle: [true, true, true, true]
 };
 
+export const useBoard = () => {
+  return useAppSelector(selectBoard)
+}
+
 export const createBoard = () => {
   return (dispatch: AppDispatch) => {
     return new Promise<string>((resolve, reject) => {
@@ -59,7 +63,7 @@ export const getPieceTypeAndColor = (num: number) => {
   }
 }
 
-const getAllCpuPiecesDetails = (getState: RootState) => {
+const getAllPieceDetails = (getState: RootState) => {
     const cpuPieces: {type: number, location: number, moves: number[]}[] = []
     getState.chess.board.forEach((piece, square) => {
       const pieceDetails = getPieceTypeAndColor(piece)
@@ -69,25 +73,25 @@ const getAllCpuPiecesDetails = (getState: RootState) => {
       }
     })
     return cpuPieces
-  }
+}
 
 //note if a piece has no moves it returns a array with undefined
 export const cpuMoveHandler = () : AppThunk => {
    return (dispatch: AppDispatch, getState) => {
-       const myCpuPieces = getAllCpuPiecesDetails(getState())
+       const myCpuPieces = getAllPieceDetails(getState())
+       //console.log(myCpuPieces)
        const myNewPieces = myCpuPieces.filter((object) => {
         return object.moves.length > 0
        })
-       console.log(myNewPieces)
+       //console.log(myNewPieces)
        const myRandomPiece = myNewPieces[Math.floor(Math.random() * myNewPieces.length)]
-       const myRandomMove = Math.floor(Math.random() * myRandomPiece.moves.length)
        //console.log(myPiece)
        if(myRandomPiece !== undefined) {
         dispatch(setCpuMove(
           {
           piece: myRandomPiece.type, 
           pieceLocation: myRandomPiece.location, 
-          move: myRandomPiece.moves[myRandomMove]
+          move: myRandomPiece.moves[Math.floor(Math.random() * myRandomPiece.moves.length)]
         }))
         dispatch(movePiece())
        }
@@ -126,13 +130,20 @@ export const moveFinder = createAsyncThunk<
   )
 
 export const moveHandler = (location: number) : AppThunk =>
-  async (dispatch: AppDispatch) => {
+  async (dispatch: AppDispatch, getState) => {
     const response = await dispatch(moveFinder(location))
     if(response.meta.requestStatus === 'fulfilled') {
       clearInterval(currentInterval)
       console.log('Promise returned true')
       dispatch(movePiece())
       //dispatch(updateCheck())
+      const pieces = getAllPieceDetails(getState())
+      const myNewPieces = pieces.filter((object) => {
+        return object.moves.length > 0
+       })
+       if(myNewPieces.length < 1) {
+        dispatch(endGame())
+       }
       return true
     } 
     if(response.meta.requestStatus === 'rejected') {
@@ -189,8 +200,7 @@ export const chessSlice = createSlice({
           state.board[i] = new Piece().Pawn | new Piece().White
         }
       }
-    }
-    ,
+    },
     selectPiece: (state, location: PayloadAction<number>) => {
       const piece = state.board[location.payload]
       const pieceDetails = getPieceTypeAndColor(piece)
@@ -241,6 +251,10 @@ export const chessSlice = createSlice({
           }
         }
       }
+    },
+    endGame: () => {
+      console.log('Game over')
+      return initialState
     },
     getPlayerSelectedMove: (state, location: PayloadAction<number>) => {
       state.possibleMoves.map(move => {
@@ -309,7 +323,8 @@ export const {
   allowPromotion, 
   updateCheck, 
   setCpuMove, 
-  setPlayerColors 
+  setPlayerColors,
+  endGame
 } = chessSlice.actions;
 
 export const selectBoard = (state: RootState) => state.chess.board
