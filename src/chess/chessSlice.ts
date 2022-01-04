@@ -55,13 +55,13 @@ const getPieceTypeAndColor = (num: number) => {
 
 const getAllCpuPieces = (getState: RootState) => {
     const myPieces: {type: number, location: number, moves: number[]}[] = []
-    getState.chess.board.forEach((piece, square) => {
-      const pieceDetails = getPieceTypeAndColor(piece)
-      if(piece !== 0 && pieceDetails.color === getState.chess.currentPlayer) {
-        const currentMoves = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove, getState.chess.canCastle)
-        myPieces.push({type: piece, location: square, moves: currentMoves})
-      }
-    })
+    // getState.chess.board.forEach((piece, square) => {
+    //   const pieceDetails = getPieceTypeAndColor(piece)
+    //   if(piece !== 0 && pieceDetails.color === getState.chess.currentPlayer) {
+    //     const currentMoves = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove, getState.chess.canCastle)
+    //     myPieces.push({type: piece, location: square, moves: currentMoves})
+    //   }
+    // })
     return myPieces
   }
 
@@ -191,11 +191,22 @@ export const chessSlice = createSlice({
       if(state.desiredMove !== null && state.selectedPiece !== null && state.selectedPieceLocation !== null) {
         
         // handles enPassant
+        // checks if friendly pawn moved to space behind last-moved enemy pawn
         if(state.lastMove === state.desiredMove + (state.currentPlayer === 'White' ? 8 : -8)
         && state.selectedPiece === new Piece().Pawn + (state.currentPlayer === 'White' ? new Piece().White 
         : new Piece().Black)){
+
           state.board[state.lastMove] = new Piece().None
+
         }
+
+        //handles castling
+        if(state.selectedPiece === new Piece().King + (state.currentPlayer === 'White' ? new Piece().White : new Piece().Black)){
+          if (state.desiredMove === state.selectedPieceLocation +2 || state.desiredMove === state.selectedPieceLocation-2){
+            new Piece().castle(state.board, state.selectedPieceLocation, state.selectedPiece, state.desiredMove, state.canCastle)
+          }
+        }
+
 
         state.board[state.desiredMove] = state.selectedPiece
         state.board[state.selectedPieceLocation] = new Piece().None
