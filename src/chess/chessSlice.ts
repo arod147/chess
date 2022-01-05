@@ -1,8 +1,8 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { useAppSelector } from '../app/hooks';
 import { RootState, AppDispatch, AppThunk } from '../app/store';
-import { Piece } from './pieceClasses';
-import {castle} from './pieceMethods'
+import { Piece } from './pieceClass';
+import {castle, updateCastleStates} from './pieceMethods'
 
 export interface State {
   board: number[]
@@ -244,6 +244,10 @@ export const chessSlice = createSlice({
         state.board[state.desiredMove] = state.selectedPiece
         state.board[state.selectedPieceLocation] = new Piece().None
         state.lastMove = state.desiredMove
+
+        if(state.canCastle.includes(true)){
+          updateCastleStates(state.board, state.currentPlayer === 'White', state.canCastle)
+      }
         // Reset
         if(state.promotion !== true) {
           if(state.currentPlayer === 'White') {
