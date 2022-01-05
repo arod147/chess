@@ -1,5 +1,5 @@
 import { useAppSelector, useAppDispatch } from '../app/hooks'
-import { promotePawn, selectBoard, selectPromotion, allowPromotion, selectCurrentPlayer } from './chessSlice'
+import { promotePawn, selectPromotion, selectCurrentPlayer } from './chessSlice'
 
 const Promotion = () => {
     const dispatch = useAppDispatch()

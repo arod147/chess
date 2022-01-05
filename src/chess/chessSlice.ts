@@ -5,7 +5,7 @@ import {castle, updateCastleStates} from './pieceMethods'
 
 export interface State {
   board: number[]
-  gameStarted: boolean
+  gameStatus: 'InProgress' | 'Ended' | 'Draw' | null
   currentPlayer: 'White' | 'Black'
   humanColor: 'White' | 'Black' | null
   cpuColor: 'White' | 'Black' | null
@@ -21,7 +21,7 @@ export interface State {
 
 const initialState: State = {
   board: new Array(64),
-  gameStarted: false,
+  gameStatus: null,
   currentPlayer: 'White',
   humanColor: null,
   cpuColor: null,
@@ -150,11 +150,11 @@ export const chessSlice = createSlice({
       if(color.payload === 'White') {
         state.humanColor = 'White'
         state.cpuColor = 'Black'
-        state.gameStarted = true
+        state.gameStatus = 'InProgress'
       } else {
         state.humanColor = 'Black'
         state.cpuColor = 'White'
-        state.gameStarted = true
+        state.gameStatus = 'InProgress'
       }
     },
     selectPiece: (state, location: PayloadAction<number>) => {
@@ -272,24 +272,28 @@ export const chessSlice = createSlice({
         state.check = false
       }
     },
-    endGame: () => {
-      return initialState
+    endGame: (state) => {
+      state.gameStatus = 'Ended'
     },
+    resetGame: () => {
+      return initialState
+    }
   }
 });
 
 export const {
-  setPieces, 
   setEmptyBoard, 
-  selectPiece, 
-  movePiece,
-  setPlayerSelectedMove, 
-  promotePawn, 
-  allowPromotion, 
-  updateCheck, 
-  setCpuMove, 
+  setPieces, 
   setPlayerColors,
-  endGame
+  selectPiece, 
+  setPlayerSelectedMove, 
+  setCpuMove, 
+  movePiece,
+  allowPromotion, 
+  promotePawn, 
+  updateCheck, 
+  endGame,
+  resetGame
 } = chessSlice.actions;
 
 export const selectBoard = (state: RootState) => state.chess.board
@@ -301,7 +305,7 @@ export const selectPromotion = (state: RootState) => state.chess.promotion
 export const selectCheck = (state: RootState) => state.chess.check
 export const selectHumanColor = (state: RootState) => state.chess.humanColor
 export const selectCpuColor = (state: RootState) => state.chess.cpuColor
-export const selectGameStated = (state: RootState) => state.chess.gameStarted
+export const selectGameStatus = (state: RootState) => state.chess.gameStatus
 
 export default chessSlice.reducer;
 

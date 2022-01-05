@@ -1,11 +1,11 @@
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
-import { selectGameStated, setPlayerColors } from '../chessSlice'
+import { selectGameStatus, setPlayerColors } from '../chessSlice'
 
 const PreGameMenu = () => {
     const dispatch = useAppDispatch()
-    const gameStarted = useAppSelector(selectGameStated)
+    const gameStatus = useAppSelector(selectGameStatus)
     return (
-        <div id='menu' style={{display: gameStarted === true ? 'none' : 'block'}}>
+        <div id='menu' style={{display: gameStatus === null ? 'block' : 'none'}}>
             <h1>Who would you like to play as white or black?</h1>
             <button onClick={() =>{dispatch(setPlayerColors('White'))}}>White</button>
             <button onClick={() =>{dispatch(setPlayerColors('Black'))}}>Black</button>
