@@ -67,12 +67,31 @@ const getAllPieceDetails = (getState: RootState, color: string | null) => {
 
 export const humanMoveHandler = (location: number) : AppThunk => {
   return (dispatch: AppDispatch, getState) => {
+    const humanPieces = getAllPieceDetails(getState(), getState().chess.humanColor)
     dispatch(setPlayerMove(location))
     dispatch(movePiece())
     const opponentMoveablePieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
     dispatch(updateCheckStatus())
-    if(opponentMoveablePieces.length < 1) {
+    if(opponentMoveablePieces.length < 1 && getState().chess.check === true ) {
       dispatch(endGame())
+    }
+    if(opponentMoveablePieces.length < 1 && getState().chess.check !== true ) {
+      dispatch(drawGame())
+    }
+    console.log(humanPieces.length + ' ' +opponentMoveablePieces.length)
+    if(humanPieces.length < 3 && opponentMoveablePieces.length < 3) {
+      const foundCpuPiece = humanPieces.find(piece => {
+        const pieceDtails = getPieceTypeAndColor(piece.type)
+        return pieceDtails.type === '010' || pieceDtails.type === '011'  
+      })
+      const foundHumanPiece = opponentMoveablePieces.find(piece => {
+        const pieceDtails = getPieceTypeAndColor(piece.type)
+        return pieceDtails.type === '010' || pieceDtails.type === '011'  
+      })
+      console.log(foundCpuPiece + ' ' + foundHumanPiece)
+      if(foundCpuPiece !== undefined && foundHumanPiece !== undefined) {
+        dispatch(drawGame())
+      }
     }
   }
 }
@@ -80,10 +99,17 @@ export const humanMoveHandler = (location: number) : AppThunk => {
 
 export const cpuMoveHandler = () : AppThunk => {
    return (dispatch: AppDispatch, getState) => {
+<<<<<<< HEAD
+      const myCpuPieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
+      
+      const myRandomPiece = myCpuPieces[Math.floor(Math.random() * myCpuPieces.length)]
+      if(myRandomPiece !== undefined) {
+=======
        const myCpuPieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
 
        const myRandomPiece = myCpuPieces[Math.floor(Math.random() * myCpuPieces.length)]
        if(myRandomPiece !== undefined) {
+>>>>>>> 2833a62f411530839e5a352155a2e655dc62a1aa
         dispatch(setCpuMove(
           {
           piece: myRandomPiece.type, 
@@ -98,7 +124,28 @@ export const cpuMoveHandler = () : AppThunk => {
         if(opponentMoveablePieces.length < 1) {
           dispatch(endGame())
         }
+<<<<<<< HEAD
+        if(opponentMoveablePieces.length < 1 && getState().chess.check !== true ) {
+          dispatch(drawGame())
+        }
+        if(myCpuPieces.length < 3 && opponentMoveablePieces.length < 3) {
+          const foundCpuPiece = myCpuPieces.find(piece => {
+            const pieceDtails = getPieceTypeAndColor(piece.type)
+            return pieceDtails.type === '010' || pieceDtails.type === '011'  
+          })
+          console.log(foundCpuPiece)
+          const foundHumanPiece = opponentMoveablePieces.find(piece => {
+            const pieceDtails = getPieceTypeAndColor(piece.type)
+            return pieceDtails.type === '010' || pieceDtails.type === '011'  
+          })
+          if(foundCpuPiece !== undefined && foundHumanPiece !== undefined) {
+            dispatch(drawGame())
+          }
+        }
+      }
+=======
        }
+>>>>>>> 2833a62f411530839e5a352155a2e655dc62a1aa
    }
 }
 
