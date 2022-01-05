@@ -1,3 +1,4 @@
+import { updateFor } from "typescript";
 import {Piece} from "./pieceClass"
 
 // returns numbers of squares to the edge of the board per square
@@ -99,6 +100,12 @@ export const updateCastleStates = (board: number[], isCurrentPlayerWhite: boolea
     }
 }
 
+export const enPassant = (board: number[], isCurrentPlayerWhite: boolean, lastMove: number) => {
+    if (board[lastMove] === new Piece().Pawn + (isCurrentPlayerWhite ? new Piece().Black : new Piece().White)){
+        board[lastMove] = new Piece().None
+    }
+}
+
 export const findAllEnemyPieces = (board: number[], isCurrentPlayerWhite: boolean) => {
     const enemyPieceLocations: number[] = []
     board.forEach((piece, index) => {
@@ -107,6 +114,7 @@ export const findAllEnemyPieces = (board: number[], isCurrentPlayerWhite: boolea
             enemyPieceLocations.push(index)
         }
     })
+
     return enemyPieceLocations
 }
 
@@ -126,6 +134,7 @@ export const pawnMoves = (board: number[], startSquare: number, selectedPiece: n
     const pawnOffsets = [9, 7]
     const possibleMoves: number[] = []
 
+    // pawn single tile and double tile moves
     if (board[startSquare + singlePawnMove] === 0){
         if ((startSquare > (isCurrentPlayerWhite ? 47 : 7) && startSquare < (isCurrentPlayerWhite ? 56 : 16))
         && board[startSquare + singlePawnMove*2] === 0){
@@ -133,23 +142,27 @@ export const pawnMoves = (board: number[], startSquare: number, selectedPiece: n
         }
         possibleMoves.push(startSquare + singlePawnMove)
     }
+
     for(let i = 0; i < 2; i++){ //check diagonals for enemy pieces
         // prevents overflow when pawn reaches end of the board
         if (board[startSquare + (isCurrentPlayerWhite ? -pawnOffsets[i] : pawnOffsets[i])] !== undefined){
+
             let boardLocation = startSquare + (isCurrentPlayerWhite ? -pawnOffsets[i] : pawnOffsets[i])
             let targetPiece = board[boardLocation]
             let pieceOnTargetSquareColor = targetPiece > 1 ? targetPiece > 16 ? 'Black' : 'White' : 'None';
 
+            // adds enPassant if availabile
             const enPassantLocations: number[] = isCurrentPlayerWhite ? [24, 25, 26, 27, 28, 29, 30, 31] : [32, 33, 34, 35, 36, 37, 38, 39]
+            
+            if((enPassantLocations.includes(startSquare) && enPassantLocations.includes(lastMove)) 
+            && board[lastMove] === new Piece().Pawn + (isCurrentPlayerWhite ? new Piece().Black : new Piece().White)){
             const currentSpace = enPassantLocations.indexOf(startSquare)
             const lastMoveSpace = enPassantLocations.indexOf(lastMove)
-            
-            if((currentSpace+1 === lastMoveSpace || currentSpace-1 === lastMoveSpace)
-            && board[lastMove] === (isCurrentPlayerWhite ? (new Piece().Pawn + new Piece().Black) : (new Piece().Pawn + new Piece().White))){
-                if(selectedPiece === (isCurrentPlayerWhite ? (new Piece().Pawn + new Piece().White) : (new Piece().Pawn + new Piece().Black))){
+
+                if(currentSpace+1 === lastMoveSpace || currentSpace-1 === lastMoveSpace){
                     possibleMoves.push(isCurrentPlayerWhite ? lastMove-8 : lastMove+8)
-                }
-            } 
+                } 
+            }
 
             // prevents overflow issues for edge pawns
             if ((distanceToEdges[boardLocation][1] + (isCurrentPlayerWhite ? 1 : -1)) === distanceToEdges[startSquare][1]){
