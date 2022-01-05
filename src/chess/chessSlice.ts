@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { useAppSelector } from '../app/hooks';
 import { RootState, AppDispatch, AppThunk } from '../app/store';
 import { Piece } from './pieceClass';
 import {castle, updateCastleStates} from './pieceMethods'
@@ -41,10 +40,6 @@ const initialState: State = {
   canCastle: [true, true, true, true]
 };
 
-export const useBoard = () => {
-  return useAppSelector(selectBoard)
-}
-
 export const createBoard = () => {
   return (dispatch: AppDispatch) => {
     return new Promise<string>((resolve, reject) => {
@@ -62,28 +57,26 @@ export const getPieceTypeAndColor = (num: number) => {
     color: binary.length === 5 ? 'Black' : 'White'
   }
 }
-
+//Returns an array of objects whith information about each piece
 const getAllPieceDetails = (getState: RootState, color: string | null) => {
-    const cpuPieces: {type: number, location: number, moves: number[]}[] = []
+    const piecesList: {type: number, location: number, moves: number[]}[] = []
     getState.chess.board.forEach((piece, square) => {
       const pieceDetails = getPieceTypeAndColor(piece)
       if(piece !== 0 && pieceDetails.color === color) {
         const moveList = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove, getState.chess.canCastle)
-        cpuPieces.push({type: piece, location: square, moves: moveList})
+        piecesList.push({type: piece, location: square, moves: moveList})
       }
     })
-    return cpuPieces
+    return piecesList.filter(piece => {
+      return piece.moves.length > 0
+    })
 }
 
-//note if a piece has no moves it returns a array with undefined
 export const cpuMoveHandler = () : AppThunk => {
    return (dispatch: AppDispatch, getState) => {
        const myCpuPieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
-       //console.log(myCpuPieces)
-       const myCpuPiecesWithMoves = myCpuPieces.filter((object) => {
-        return object.moves.length > 0
-       })
-       const myRandomPiece = myCpuPiecesWithMoves[Math.floor(Math.random() * myCpuPiecesWithMoves.length)]
+
+       const myRandomPiece = myCpuPieces[Math.floor(Math.random() * myCpuPieces.length)]
        if(myRandomPiece !== undefined) {
         dispatch(setCpuMove(
           {
@@ -92,30 +85,25 @@ export const cpuMoveHandler = () : AppThunk => {
           move: myRandomPiece.moves[Math.floor(Math.random() * myRandomPiece.moves.length)]
         }))
         dispatch(movePiece())
-        const pieces = getAllPieceDetails(getState(), getState().chess.humanColor)
-        const myPiecesWithMoves = pieces.filter((object) => {
-        return object.moves.length > 0
-        })
+
+        const opponentMoveablePieces = getAllPieceDetails(getState(), getState().chess.humanColor)
         dispatch(updateCheck())
-        if(myPiecesWithMoves.length < 1) {
+        if(opponentMoveablePieces.length < 1) {
           dispatch(endGame())
         }
        }
    }
 }
 
-export const moveHandler = (location: number) : AppThunk => {
+export const humanMoveHandler = (location: number) : AppThunk => {
   return (dispatch: AppDispatch, getState) => {
-    dispatch(getPlayerSelectedMove(location))
+    dispatch(setPlayerSelectedMove(location))
     dispatch(movePiece())
-    const pieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
-    const myPiecesWithMoves = pieces.filter((object) => {
-      return object.moves.length > 0
-      })
-      dispatch(updateCheck())
-      if(myPiecesWithMoves.length < 1) {
-        dispatch(endGame())
-      }
+    const opponentMoveablePieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
+    dispatch(updateCheck())
+    if(opponentMoveablePieces.length < 1) {
+      dispatch(endGame())
+    }
   }
 }
   
@@ -124,39 +112,28 @@ export const chessSlice = createSlice({
   name: 'chess',
   initialState,
   reducers: {
-    setPlayerColors: (state, color: PayloadAction<string>) => {
-      if(color.payload === 'White') {
-        state.humanColor = 'White'
-        state.cpuColor = 'Black'
-        state.gameStarted = true
-      } else {
-        state.humanColor = 'Black'
-        state.cpuColor = 'White'
-        state.gameStarted = true
-      }
-    },
     setEmptyBoard: (state) => {
       for(let i = 0; i < state.board.length; i++) {
         state.board[i] = new Piece().None
       }
     },
     setPieces: (state) => {
-          state.board[0] = new Piece().Rook | new Piece().Black
-          state.board[1] = new Piece().Knight | new Piece().Black
-          state.board[2] = new Piece().Bishop | new Piece().Black
-          state.board[3] = new Piece().Queen | new Piece().Black
-          state.board[4] = new Piece().King | new Piece().Black
-          state.board[5] = new Piece().Bishop | new Piece().Black
-          state.board[6] = new Piece().Knight | new Piece().Black
-          state.board[7] = new Piece().Rook | new Piece().Black
-          state.board[56] = new Piece().Rook | new Piece().White
-          state.board[57] = new Piece().Knight | new Piece().White
-          state.board[58] = new Piece().Bishop | new Piece().White
-          state.board[59] = new Piece().Queen | new Piece().White
-          state.board[60] = new Piece().King | new Piece().White
-          state.board[61] = new Piece().Bishop | new Piece().White
-          state.board[62] = new Piece().Knight | new Piece().White
-          state.board[63] = new Piece().Rook | new Piece().White
+      state.board[0] = new Piece().Rook | new Piece().Black
+      state.board[1] = new Piece().Knight | new Piece().Black
+      state.board[2] = new Piece().Bishop | new Piece().Black
+      state.board[3] = new Piece().Queen | new Piece().Black
+      state.board[4] = new Piece().King | new Piece().Black
+      state.board[5] = new Piece().Bishop | new Piece().Black
+      state.board[6] = new Piece().Knight | new Piece().Black
+      state.board[7] = new Piece().Rook | new Piece().Black
+      state.board[56] = new Piece().Rook | new Piece().White
+      state.board[57] = new Piece().Knight | new Piece().White
+      state.board[58] = new Piece().Bishop | new Piece().White
+      state.board[59] = new Piece().Queen | new Piece().White
+      state.board[60] = new Piece().King | new Piece().White
+      state.board[61] = new Piece().Bishop | new Piece().White
+      state.board[62] = new Piece().Knight | new Piece().White
+      state.board[63] = new Piece().Rook | new Piece().White
       for(let i = 8; i < 56; i++) {
         if(i >= 8 && i < 16) {
           state.board[i] = new Piece().Pawn | new Piece().Black
@@ -169,6 +146,17 @@ export const chessSlice = createSlice({
         }
       }
     },
+    setPlayerColors: (state, color: PayloadAction<string>) => {
+      if(color.payload === 'White') {
+        state.humanColor = 'White'
+        state.cpuColor = 'Black'
+        state.gameStarted = true
+      } else {
+        state.humanColor = 'Black'
+        state.cpuColor = 'White'
+        state.gameStarted = true
+      }
+    },
     selectPiece: (state, location: PayloadAction<number>) => {
       const piece = state.board[location.payload]
       const pieceDetails = getPieceTypeAndColor(piece)
@@ -179,6 +167,14 @@ export const chessSlice = createSlice({
         state.possibleMoves = new Piece().legalMoves(state.board, state.selectedPieceLocation, state.selectedPiece, state.lastMove, state.canCastle)
       }
     },
+    setPlayerSelectedMove: (state, location: PayloadAction<number>) => {
+      state.possibleMoves.map(move => {
+        if(move === location.payload) {
+          state.desiredMove = location.payload
+        }
+        return move
+      })
+    },
     setCpuMove: (state, object: PayloadAction<{piece: number, pieceLocation: number, move: number}>) => {
       state.selectedPiece = object.payload.piece
       state.selectedPieceLocation = object.payload.pieceLocation
@@ -186,17 +182,17 @@ export const chessSlice = createSlice({
     },
     movePiece: (state) => {
       if(state.desiredMove !== null && state.selectedPiece !== null && state.selectedPieceLocation !== null) {
-        
+        const piece = getPieceTypeAndColor(state.selectedPiece)
         // handles enPassant
         // checks if friendly pawn moved to space behind last-moved enemy pawn
         if(state.lastMove === state.desiredMove + (state.currentPlayer === 'White' ? 8 : -8)
-        && state.selectedPiece === new Piece().Pawn + (state.currentPlayer === 'White' ? new Piece().White 
+        && state.selectedPiece === new Piece().Pawn + (state.currentPlayer === 'White' ? new Piece().White
         : new Piece().Black)){
           state.board[state.lastMove] = new Piece().None
         }
 
         //handles castling
-        if(state.selectedPiece === new Piece().King + (state.currentPlayer === 'White' ? new Piece().White : new Piece().Black)){
+        if(piece.type === '110'){
           if (state.desiredMove === state.selectedPieceLocation + 2 || state.desiredMove === state.selectedPieceLocation-2){
             castle(state.board, state.selectedPiece, state.desiredMove, state.canCastle)
           }
@@ -222,17 +218,6 @@ export const chessSlice = createSlice({
           }
         }
       }
-    },
-    endGame: () => {
-      return initialState
-    },
-    getPlayerSelectedMove: (state, location: PayloadAction<number>) => {
-      state.possibleMoves.map(move => {
-        if(move === location.payload) {
-          state.desiredMove = location.payload
-        }
-        return move
-      })
     },
     allowPromotion: (state) => {
       state.promotion = true
@@ -266,9 +251,9 @@ export const chessSlice = createSlice({
         if(piece !== 0 && pieceDetails.color !== state.currentPlayer) {
           pieceMoves = new Piece().legalMoves(state.board, square, piece, state.lastMove, state.canCastle)
           const playerInCheck = pieceMoves.find(move => {
-          const attackedPieceBinary = (state.board[move]).toString(2)
-          const attackPieceType = attackedPieceBinary.substring(attackedPieceBinary.length-3)
-          return attackPieceType === '110'
+            const attackedPieceBinary = (state.board[move]).toString(2)
+            const attackPieceType = attackedPieceBinary.substring(attackedPieceBinary.length-3)
+            return attackPieceType === '110'
           })
           move = playerInCheck
         }
@@ -280,7 +265,10 @@ export const chessSlice = createSlice({
         state.check = false
       }
     },
-}
+    endGame: () => {
+      return initialState
+    },
+  }
 });
 
 export const {
@@ -288,7 +276,7 @@ export const {
   setEmptyBoard, 
   selectPiece, 
   movePiece,
-  getPlayerSelectedMove, 
+  setPlayerSelectedMove, 
   promotePawn, 
   allowPromotion, 
   updateCheck, 

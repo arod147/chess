@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 
 import { 
-    moveHandler, 
+    humanMoveHandler, 
     selectBoard, 
     selectCurrentPiece, 
     selectCurrentPieceLocation,
@@ -56,7 +56,6 @@ const Chessboard = () => {
      }
 
       if(piece !== 0) {
-
         //Display our pieces on the board
         return <Tile key={square} tileColor={backGroundColor} 
             onClick={() =>{
@@ -69,18 +68,18 @@ const Chessboard = () => {
                 }
               } else {
                 if(selectedPiece !== null) {
-                  dispatch(moveHandler(square))
+                  dispatch(humanMoveHandler(square))
                 }
               }
             }}>
-                <Piece name={piece}/>
-                </Tile>
+        <Piece name={piece}/>
+        </Tile>
       }
       //Display an empty square
       return <Tile key={square} tileColor={backGroundColor}
       onClick={() =>{
         if(selectedPiece !== null){
-          dispatch(moveHandler(square))
+          dispatch(humanMoveHandler(square))
         }
       }} 
       >
