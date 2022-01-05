@@ -2,12 +2,11 @@ import { useEffect } from 'react';
 import './App.css';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import { 
-  cpuMoveHandler,
-    createBoard, 
-    selectCpuColor, 
-    selectCurrentPlayer, 
-    selectGameStatus, 
-    setPieces } from './chess/chessSlice';
+  cpuMoveHandler, 
+  selectCpuColor, 
+  selectCurrentPlayer, 
+  selectGameStatus, 
+  setPieces } from './chess/chessSlice';
 import Chessboard from './chess/Components/Chessboard';
 import EndScreen from './chess/Components/EndScreen';
 import PreGameMenu from './chess/Components/PreGameMenu';
@@ -20,10 +19,9 @@ function App() {
   const gameStatus = useAppSelector(selectGameStatus)
 
   useEffect(() => {
-    if(gameStatus === 'InProgress')
-        dispatch(createBoard()).then(() => {
-          dispatch(setPieces())
-        })
+    if(gameStatus === 'InProgress') {
+      dispatch(setPieces())
+    }
     }, [gameStatus, dispatch])
 
   useEffect(() => {

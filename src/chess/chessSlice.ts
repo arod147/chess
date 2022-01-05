@@ -40,16 +40,6 @@ const initialState: State = {
   canCastle: [true, true, true, true]
 };
 
-export const createBoard = () => {
-  return (dispatch: AppDispatch) => {
-    return new Promise<string>((resolve, reject) => {
-      dispatch(setEmptyBoard())
-      resolve("Empty board created")
-      reject("Failed to create empty board")
-    })
-  }
-}
-
 export const getPieceTypeAndColor = (num: number) => {
   const binary = (num).toString(2) 
   return {
@@ -77,10 +67,10 @@ const getAllPieceDetails = (getState: RootState, color: string | null) => {
 
 export const humanMoveHandler = (location: number) : AppThunk => {
   return (dispatch: AppDispatch, getState) => {
-    dispatch(setPlayerSelectedMove(location))
+    dispatch(setPlayerMove(location))
     dispatch(movePiece())
     const opponentMoveablePieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
-    dispatch(updateCheck())
+    dispatch(updateCheckStatus())
     if(opponentMoveablePieces.length < 1) {
       dispatch(endGame())
     }
@@ -104,7 +94,7 @@ export const cpuMoveHandler = () : AppThunk => {
         dispatch(movePiece())
 
         const opponentMoveablePieces = getAllPieceDetails(getState(), getState().chess.humanColor)
-        dispatch(updateCheck())
+        dispatch(updateCheckStatus())
         if(opponentMoveablePieces.length < 1) {
           dispatch(endGame())
         }
@@ -116,11 +106,6 @@ export const chessSlice = createSlice({
   name: 'chess',
   initialState,
   reducers: {
-    setEmptyBoard: (state) => {
-      for(let i = 0; i < state.board.length; i++) {
-        state.board[i] = new Piece().None
-      }
-    },
     setPieces: (state) => {
       state.board[0] = new Piece().Rook | new Piece().Black
       state.board[1] = new Piece().Knight | new Piece().Black
@@ -171,7 +156,7 @@ export const chessSlice = createSlice({
         state.possibleMoves = new Piece().legalMoves(state.board, state.selectedPieceLocation, state.selectedPiece, state.lastMove, state.canCastle)
       }
     },
-    setPlayerSelectedMove: (state, location: PayloadAction<number>) => {
+    setPlayerMove: (state, location: PayloadAction<number>) => {
       state.possibleMoves.map(move => {
         if(move === location.payload) {
           state.desiredMove = location.payload
@@ -251,7 +236,7 @@ export const chessSlice = createSlice({
       })
     },
     //This action will check after each move to see if a player is in check
-    updateCheck: (state) => {
+    updateCheckStatus: (state) => {
       const isPlayerInCheck = state.board.find((piece, square) => {
         const pieceDetails = getPieceTypeAndColor(piece)
         var pieceMoves: number[]
@@ -282,16 +267,15 @@ export const chessSlice = createSlice({
   }
 });
 
-export const {
-  setEmptyBoard, 
+export const { 
   setPieces, 
   setPlayerColors,
   selectPiece, 
-  setPlayerSelectedMove, 
+  setPlayerMove, 
   setCpuMove, 
   movePiece, 
   promotePawn, 
-  updateCheck, 
+  updateCheckStatus, 
   endGame,
   resetGame
 } = chessSlice.actions;
