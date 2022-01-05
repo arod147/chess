@@ -15,7 +15,7 @@ const Promotion = () => {
             })
         }
         if(promotion === true && currentPlayerColor === 'Black') {
-            blackPromoPieces.map(value => {
+            return blackPromoPieces.map(value => {
                 return <div key={value} onClick={() => dispatch(promotePawn(parseInt(value.slice(1))))} className={value + ' ' + 'piece'}></div>
             })
         }
