@@ -135,7 +135,6 @@ export const cpuMoveHandler = () : AppThunk => {
             const pieceDtails = getPieceTypeAndColor(piece.type)
             return pieceDtails.type === '010' || pieceDtails.type === '011'  
           })
-          console.log(foundCpuPiece)
           const foundHumanPiece = opponentMoveablePieces.find(piece => {
             const pieceDtails = getPieceTypeAndColor(piece.type)
             return pieceDtails.type === '010' || pieceDtails.type === '011'  
