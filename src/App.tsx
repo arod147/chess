@@ -7,7 +7,6 @@ import {
     selectCpuColor, 
     selectCurrentPlayer, 
     selectGameStated, 
-    selectHumanColor, 
     setPieces } from './chess/chessSlice';
 import Chessboard from './chess/Components/Chessboard';
 import PreGameMenu from './chess/Components/PreGameMenu';
@@ -17,7 +16,6 @@ function App() {
   const dispatch = useAppDispatch()
   const playerTurn = useAppSelector(selectCurrentPlayer)
   const cpuColor = useAppSelector(selectCpuColor)
-  const humanColor = useAppSelector(selectHumanColor)
   const gameStarted = useAppSelector(selectGameStated)
 
   useEffect(() => {
@@ -25,13 +23,13 @@ function App() {
         dispatch(createBoard()).then(() => {
           dispatch(setPieces())
         })
-    }, [gameStarted])
+    }, [gameStarted, dispatch])
 
   useEffect(() => {
     if(playerTurn === cpuColor && gameStarted !== false) {
       setTimeout(() => {dispatch(cpuMoveHandler())}, 300)
     }
-  }, [playerTurn, gameStarted])  
+  }, [playerTurn, gameStarted, dispatch, cpuColor])  
     
   return (
     <div className="App">

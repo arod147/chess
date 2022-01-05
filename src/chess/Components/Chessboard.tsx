@@ -6,12 +6,10 @@ import {
     selectCurrentPiece, 
     selectCurrentPieceLocation,
     selectCheck,
-    selectCurrentPlayer, 
-    getPlayerSelectedMove, 
+    selectCurrentPlayer,  
     selectPossibleMoves,
     getPieceTypeAndColor,
     selectHumanColor,
-    selectCpuColor,
     selectPiece, } from '../chessSlice';
 import Tile from './Tiles';
 import Piece from './Piece';
@@ -22,7 +20,6 @@ const Chessboard = () => {
     const selectedPieceLocation = useAppSelector(selectCurrentPieceLocation)
     const currentPlayer = useAppSelector(selectCurrentPlayer)
     const humanColor = useAppSelector(selectHumanColor)
-    const cpuColor = useAppSelector(selectCpuColor)
     const board = useAppSelector(selectBoard)
     const possibleMoves = useAppSelector(selectPossibleMoves)
     const inCheck = useAppSelector(selectCheck)

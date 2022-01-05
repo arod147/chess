@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { useAppSelector } from '../app/hooks';
 import { RootState, AppDispatch, AppThunk } from '../app/store';
 import { Piece } from './pieceClass';
@@ -224,7 +224,6 @@ export const chessSlice = createSlice({
       }
     },
     endGame: () => {
-      console.log('Game over')
       return initialState
     },
     getPlayerSelectedMove: (state, location: PayloadAction<number>) => {
@@ -262,8 +261,6 @@ export const chessSlice = createSlice({
     updateCheck: (state) => {
       const isPlayerInCheck = state.board.find((piece, square) => {
         const pieceDetails = getPieceTypeAndColor(piece)
-        const pieceBinary = (piece).toString(2)
-        const pieceColor = pieceBinary.length === 5 ? 'Black' : 'White'
         var pieceMoves: number[]
         var move: number| undefined
         if(piece !== 0 && pieceDetails.color !== state.currentPlayer) {
