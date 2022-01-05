@@ -63,11 +63,11 @@ export const getPieceTypeAndColor = (num: number) => {
   }
 }
 
-const getAllPieceDetails = (getState: RootState) => {
+const getAllPieceDetails = (getState: RootState, color: string | null) => {
     const cpuPieces: {type: number, location: number, moves: number[]}[] = []
     getState.chess.board.forEach((piece, square) => {
       const pieceDetails = getPieceTypeAndColor(piece)
-      if(piece !== 0 && pieceDetails.color === getState.chess.currentPlayer) {
+      if(piece !== 0 && pieceDetails.color === color) {
         const moveList = new Piece().legalMoves(getState.chess.board, square, piece, getState.chess.lastMove, getState.chess.canCastle)
         cpuPieces.push({type: piece, location: square, moves: moveList})
       }
@@ -78,14 +78,12 @@ const getAllPieceDetails = (getState: RootState) => {
 //note if a piece has no moves it returns a array with undefined
 export const cpuMoveHandler = () : AppThunk => {
    return (dispatch: AppDispatch, getState) => {
-       const myCpuPieces = getAllPieceDetails(getState())
+       const myCpuPieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
        //console.log(myCpuPieces)
-       const myNewPieces = myCpuPieces.filter((object) => {
+       const myCpuPiecesWithMoves = myCpuPieces.filter((object) => {
         return object.moves.length > 0
        })
-       //console.log(myNewPieces)
-       const myRandomPiece = myNewPieces[Math.floor(Math.random() * myNewPieces.length)]
-       //console.log(myPiece)
+       const myRandomPiece = myCpuPiecesWithMoves[Math.floor(Math.random() * myCpuPiecesWithMoves.length)]
        if(myRandomPiece !== undefined) {
         dispatch(setCpuMove(
           {
@@ -94,6 +92,14 @@ export const cpuMoveHandler = () : AppThunk => {
           move: myRandomPiece.moves[Math.floor(Math.random() * myRandomPiece.moves.length)]
         }))
         dispatch(movePiece())
+        const pieces = getAllPieceDetails(getState(), getState().chess.humanColor)
+        const myPiecesWithMoves = pieces.filter((object) => {
+        return object.moves.length > 0
+        })
+        dispatch(updateCheck())
+        if(myPiecesWithMoves.length < 1) {
+          dispatch(endGame())
+        }
        }
    }
 }
@@ -136,14 +142,14 @@ export const moveHandler = (location: number) : AppThunk =>
       clearInterval(currentInterval)
       console.log('Promise returned true')
       dispatch(movePiece())
-      //dispatch(updateCheck())
-      const pieces = getAllPieceDetails(getState())
-      const myNewPieces = pieces.filter((object) => {
+      const pieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
+        const myPiecesWithMoves = pieces.filter((object) => {
         return object.moves.length > 0
-       })
-       if(myNewPieces.length < 1) {
-        dispatch(endGame())
-       }
+        })
+        dispatch(updateCheck())
+        if(myPiecesWithMoves.length < 1) {
+          dispatch(endGame())
+        }
       return true
     } 
     if(response.meta.requestStatus === 'rejected') {
@@ -291,16 +297,19 @@ export const chessSlice = createSlice({
     updateCheck: (state) => {
       const isPlayerInCheck = state.board.find((piece, square) => {
         const pieceDetails = getPieceTypeAndColor(piece)
+        const pieceBinary = (piece).toString(2)
+        const pieceColor = pieceBinary.length === 5 ? 'Black' : 'White'
         var pieceMoves: number[]
         var move: number| undefined
-        //Check each enemy piece to see if the opposing king is in check
         if(piece !== 0 && pieceDetails.color !== state.currentPlayer) {
           pieceMoves = new Piece().legalMoves(state.board, square, piece, state.lastMove, state.canCastle)
           const playerInCheck = pieceMoves.find(move => {
-          const attackedPieceDetails = getPieceTypeAndColor(state.board[move])
-          return attackedPieceDetails.type === '110'
+          const attackedPieceBinary = (state.board[move]).toString(2)
+          const attackPieceType = attackedPieceBinary.substring(attackedPieceBinary.length-3)
+          return attackPieceType === '110'
           })
           move = playerInCheck
+          console.log(playerInCheck)
         }
         return move !== undefined 
       })
