@@ -177,7 +177,6 @@ export const chessSlice = createSlice({
         state.selectedPiece = piece
         //Get possible moves for selected piece
         state.possibleMoves = new Piece().legalMoves(state.board, state.selectedPieceLocation, state.selectedPiece, state.lastMove, state.canCastle)
-        console.log(state.possibleMoves)
       }
     },
     setCpuMove: (state, object: PayloadAction<{piece: number, pieceLocation: number, move: number}>) => {
@@ -229,7 +228,6 @@ export const chessSlice = createSlice({
       return initialState
     },
     getPlayerSelectedMove: (state, location: PayloadAction<number>) => {
-      console.log(location.payload)
       state.possibleMoves.map(move => {
         if(move === location.payload) {
           state.desiredMove = location.payload
@@ -276,7 +274,6 @@ export const chessSlice = createSlice({
           return attackPieceType === '110'
           })
           move = playerInCheck
-          console.log(playerInCheck)
         }
         return move !== undefined 
       })

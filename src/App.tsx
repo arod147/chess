@@ -23,7 +23,6 @@ function App() {
   useEffect(() => {
     if(gameStarted !== false)
         dispatch(createBoard()).then(() => {
-          console.log('Board created filling board with pieces')
           dispatch(setPieces())
         })
     }, [gameStarted])
