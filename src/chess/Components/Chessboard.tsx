@@ -60,7 +60,7 @@ const Chessboard = () => {
         //Display our pieces on the board
         return <Tile key={square} tileColor={backGroundColor} 
             onClick={() =>{
-              if(pieceDetails.color === humanColor && promotionStatus !== true) {
+              if(promotionStatus !== true) {
                 if(selectedPiece === null) {
                   dispatch(selectPiece(square))
                 }
@@ -72,6 +72,18 @@ const Chessboard = () => {
                   dispatch(humanMoveHandler(square))
                 }
               }
+              //if(pieceDetails.color === humanColor && promotionStatus !== true) {
+              //  if(selectedPiece === null) {
+              //    dispatch(selectPiece(square))
+              //  }
+              //  if(selectedPiece !== null && square !== selectedPieceLocation) {
+              //    dispatch(selectPiece(square))
+              //  }
+              //} else {
+              //  if(selectedPiece !== null) {
+              //    dispatch(humanMoveHandler(square))
+              //  }
+              //}
             }}>
         <Piece name={piece}/>
         </Tile>

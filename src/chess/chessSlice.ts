@@ -172,6 +172,7 @@ export const chessSlice = createSlice({
     movePiece: (state) => {
       if(state.desiredMove !== null && state.selectedPiece !== null && state.selectedPieceLocation !== null) {
         const piece = getPieceTypeAndColor(state.selectedPiece)
+        const king = '110'
         // handles enPassant
         // checks if friendly pawn moved to space behind last-moved enemy pawn
         if(state.lastMove === state.desiredMove + (state.currentPlayer === 'White' ? 8 : -8)
@@ -181,7 +182,7 @@ export const chessSlice = createSlice({
         }
 
         //handles castling
-        if(piece.type === '110'){
+        if(piece.type === king){
           if (state.desiredMove === state.selectedPieceLocation + 2 || state.desiredMove === state.selectedPieceLocation-2){
             castle(state.board, state.selectedPiece, state.desiredMove, state.canCastle)
           }

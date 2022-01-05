@@ -107,7 +107,6 @@ export const findAllEnemyPieces = (board: number[], isCurrentPlayerWhite: boolea
             enemyPieceLocations.push(index)
         }
     })
-
     return enemyPieceLocations
 }
 
