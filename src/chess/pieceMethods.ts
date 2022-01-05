@@ -1,4 +1,3 @@
-import { updateFor } from "typescript";
 import {Piece} from "./pieceClass"
 
 // returns numbers of squares to the edge of the board per square
@@ -38,13 +37,13 @@ export const castle = (board: number[], selectedPiece: number, desiredMove: numb
     // checks if piece is king, might be redundant
     if(selectedPiece === new Piece().King + (isCurrentPlayerWhite ? new Piece().White : new Piece().Black)){
         //king's side castling
-        if((desiredMove === (isCurrentPlayerWhite ? 62 : 6) && canCastle[(isCurrentPlayerWhite ? 0 : 2)])
+        if((desiredMove === (isCurrentPlayerWhite ? 62 : 6) && canCastle[(isCurrentPlayerWhite ? 1 : 3)])
         && kingSideSpaces.every((spaceIndex) => {return board[spaceIndex] === new Piece().None})){
             board[desiredMove-1] = isCurrentPlayerWhite ? board[63] : board[7]
             board[isCurrentPlayerWhite ? 63 : 7] = new Piece().None
         }
         //queen's side castling
-        if((desiredMove === (isCurrentPlayerWhite ? 58 : 2) && canCastle[(isCurrentPlayerWhite ? 1 : 3)])
+        if((desiredMove === (isCurrentPlayerWhite ? 58 : 2) && canCastle[(isCurrentPlayerWhite ? 0 : 2)])
         && queenSideSpaces.every((spaceIndex) => {return board[spaceIndex] === new Piece().None})){
             board[desiredMove+1] = isCurrentPlayerWhite ? board[56] : board[0]
             board[isCurrentPlayerWhite ? 56 : 0] = new Piece().None
@@ -54,14 +53,21 @@ export const castle = (board: number[], selectedPiece: number, desiredMove: numb
 
 export const castleMovesAvailable = (board: number[], isCurrentPlayerWhite: boolean, enemyMoves: number[], canCastle: boolean[]) => {
     const legalCastleMoves: number[] = []
-
+// 0  1  2  3  4  5  6  7
+// 8  9  10 11 12 13 14 15
+// 16 17 18 19 20 21 22 23
+// 24 25 26 27 28 29 30 31
+// 32 33 34 35 36 37 38 39
+// 40 41 42 43 44 45 46 47
+// 48 49 50 51 52 53 54 55
+// 56 57 58 59 60 61 62 63
     for(let castleSide = 0; castleSide < 2; castleSide++){ // castleSide = 0 is queenside, castleSide = 1 is kingside
         if (canCastle[castleSide + (isCurrentPlayerWhite ? 0 : 2)]){
             // spaces that need to be empty to castle
             const kingSideSpaces = isCurrentPlayerWhite ? [61,62]:[5, 6]
             const queenSideSpaces = isCurrentPlayerWhite ? [57,58,59]:[1, 2, 3]
 
-            // indexies account for king's side castle space and then queen's side space
+            // indexies account for queens's side castle space and then king's side space
             const whiteCastleSpaces = [58, 62] 
             const blackCastleSpaces = [2, 6] 
 
