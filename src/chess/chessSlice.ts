@@ -78,17 +78,15 @@ export const humanMoveHandler = (location: number) : AppThunk => {
     if(opponentMoveablePieces.length < 1 && getState().chess.check !== true ) {
       dispatch(drawGame())
     }
-    console.log(humanPieces.length + ' ' +opponentMoveablePieces.length)
     if(humanPieces.length < 3 && opponentMoveablePieces.length < 3) {
       const foundCpuPiece = humanPieces.find(piece => {
-        const pieceDtails = getPieceTypeAndColor(piece.type)
-        return pieceDtails.type === '010' || pieceDtails.type === '011'  
+        const pieceDetails = getPieceTypeAndColor(piece.type)
+        return pieceDetails.type === '010' || pieceDetails.type === '011'  
       })
       const foundHumanPiece = opponentMoveablePieces.find(piece => {
-        const pieceDtails = getPieceTypeAndColor(piece.type)
-        return pieceDtails.type === '010' || pieceDtails.type === '011'  
+        const pieceDetails = getPieceTypeAndColor(piece.type)
+        return pieceDetails.type === '010' || pieceDetails.type === '011'  
       })
-      console.log(foundCpuPiece + ' ' + foundHumanPiece)
       if(foundCpuPiece !== undefined && foundHumanPiece !== undefined) {
         dispatch(drawGame())
       }

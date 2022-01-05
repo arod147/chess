@@ -47,6 +47,7 @@ export class Piece {
         
         // adds castling moves (if available) to trueLegalMoves array
         if(selectedPiece === this.King + (isCurrentPlayerWhite ? this.White : this.Black)){
+            console.log('in if')
             _.castleMovesAvailable(board, isCurrentPlayerWhite, enemyMoves, canCastle).forEach((move) =>{
                 trueLegalMoves.push(move)
             })
