@@ -1,10 +1,6 @@
 import { useAppDispatch, useAppSelector } from "../../app/hooks"
 import { resetGame, selectCurrentPlayer, selectGameStatus } from "../chessSlice"
 
-
-
-
-
 const EndScreen = () => {
     const dispatch = useAppDispatch()
     const gameStatus = useAppSelector(selectGameStatus)

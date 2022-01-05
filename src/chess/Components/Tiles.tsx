@@ -1,6 +1,5 @@
 import { FunctionComponent } from 'react'
 
-
 type TileProps = {
     tileColor: string;
     onClick: Function;

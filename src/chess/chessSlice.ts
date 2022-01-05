@@ -57,9 +57,11 @@ export const getPieceTypeAndColor = (num: number) => {
     color: binary.length === 5 ? 'Black' : 'White'
   }
 }
+
 //Returns an array of objects whith information about each piece
 const getAllPieceDetails = (getState: RootState, color: string | null) => {
     const piecesList: {type: number, location: number, moves: number[]}[] = []
+    
     getState.chess.board.forEach((piece, square) => {
       const pieceDetails = getPieceTypeAndColor(piece)
       if(piece !== 0 && pieceDetails.color === color) {
@@ -67,32 +69,10 @@ const getAllPieceDetails = (getState: RootState, color: string | null) => {
         piecesList.push({type: piece, location: square, moves: moveList})
       }
     })
+    
     return piecesList.filter(piece => {
       return piece.moves.length > 0
     })
-}
-
-export const cpuMoveHandler = () : AppThunk => {
-   return (dispatch: AppDispatch, getState) => {
-       const myCpuPieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
-
-       const myRandomPiece = myCpuPieces[Math.floor(Math.random() * myCpuPieces.length)]
-       if(myRandomPiece !== undefined) {
-        dispatch(setCpuMove(
-          {
-          piece: myRandomPiece.type, 
-          pieceLocation: myRandomPiece.location, 
-          move: myRandomPiece.moves[Math.floor(Math.random() * myRandomPiece.moves.length)]
-        }))
-        dispatch(movePiece())
-
-        const opponentMoveablePieces = getAllPieceDetails(getState(), getState().chess.humanColor)
-        dispatch(updateCheck())
-        if(opponentMoveablePieces.length < 1) {
-          dispatch(endGame())
-        }
-       }
-   }
 }
 
 export const humanMoveHandler = (location: number) : AppThunk => {
@@ -106,7 +86,31 @@ export const humanMoveHandler = (location: number) : AppThunk => {
     }
   }
 }
-  
+
+
+export const cpuMoveHandler = () : AppThunk => {
+   return (dispatch: AppDispatch, getState) => {
+       const myCpuPieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
+
+       const myRandomPiece = myCpuPieces[Math.floor(Math.random() * myCpuPieces.length)]
+       if(myRandomPiece !== undefined) {
+        dispatch(setCpuMove(
+          {
+          piece: myRandomPiece.type, 
+          pieceLocation: myRandomPiece.location, 
+          move: myRandomPiece.moves[Math.floor(Math.random() * myRandomPiece.moves.length)]
+        }))
+
+        dispatch(movePiece())
+
+        const opponentMoveablePieces = getAllPieceDetails(getState(), getState().chess.humanColor)
+        dispatch(updateCheck())
+        if(opponentMoveablePieces.length < 1) {
+          dispatch(endGame())
+        }
+       }
+   }
+}
 
 export const chessSlice = createSlice({
   name: 'chess',
@@ -206,7 +210,7 @@ export const chessSlice = createSlice({
           updateCastleStates(state.board, state.currentPlayer === 'White', state.canCastle)
       }
       const foundPawnToPromote = state.board.find((piece, square) => {
-        return (square <= 7  && piece === 9) || (square > 55 && square <= 63 && piece === 17)
+        return (square <= 7  && piece === 9) || (square > 55 && piece === 17)
       })
       if(foundPawnToPromote !== undefined) {
         state.promotion = true
@@ -225,9 +229,6 @@ export const chessSlice = createSlice({
           }
         }
       }
-    },
-    allowPromotion: (state) => {
-      state.promotion = true
     },
     promotePawn: (state, piece: PayloadAction<number>) => {
       state.board.map((currentPiece, square) => {
@@ -288,8 +289,7 @@ export const {
   selectPiece, 
   setPlayerSelectedMove, 
   setCpuMove, 
-  movePiece,
-  allowPromotion, 
+  movePiece, 
   promotePawn, 
   updateCheck, 
   endGame,
