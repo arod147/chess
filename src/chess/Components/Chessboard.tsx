@@ -10,7 +10,8 @@ import {
     selectPossibleMoves,
     getPieceTypeAndColor,
     selectHumanColor,
-    selectPiece, } from '../chessSlice';
+    selectPiece,
+    selectPromotion, } from '../chessSlice';
 import Tile from './Tiles';
 import Piece from './Piece';
 
@@ -23,13 +24,13 @@ const Chessboard = () => {
     const board = useAppSelector(selectBoard)
     const possibleMoves = useAppSelector(selectPossibleMoves)
     const inCheck = useAppSelector(selectCheck)
-    
+    const promotionStatus = useAppSelector(selectPromotion)
     var currentRow = 0;
     const chessBoard = board.map((piece, square)=> {
     const pieceDetails = dispatch(getPieceTypeAndColor(piece))
     let moves = possibleMoves
     var backGroundColor = 'none'
-    
+   
       if(square % 8 === 0 && square !== 0) {
         currentRow = currentRow + 1
       }
@@ -59,8 +60,8 @@ const Chessboard = () => {
         //Display our pieces on the board
         return <Tile key={square} tileColor={backGroundColor} 
             onClick={() =>{
-              if(pieceDetails.color === humanColor) {
-                if(selectedPiece === null ) {
+              if(pieceDetails.color === humanColor && promotionStatus !== true) {
+                if(selectedPiece === null) {
                   dispatch(selectPiece(square))
                 }
                 if(selectedPiece !== null && square !== selectedPieceLocation) {

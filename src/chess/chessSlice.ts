@@ -205,6 +205,13 @@ export const chessSlice = createSlice({
         if(state.canCastle.includes(true)){
           updateCastleStates(state.board, state.currentPlayer === 'White', state.canCastle)
       }
+      const foundPawnToPromote = state.board.find((piece, square) => {
+        return (square <= 7  && piece === 9) || (square > 55 && square <= 63 && piece === 17)
+      })
+      if(foundPawnToPromote !== undefined) {
+        state.promotion = true
+      }
+
         // Reset
         if(state.promotion !== true) {
           if(state.currentPlayer === 'White') {
@@ -228,14 +235,14 @@ export const chessSlice = createSlice({
         if(square <= 7 && pieceDetails.type === '001') {
           state.board[square] = piece.payload
           state.promotion = false
-          state.currentPlayer = 'White'
+          state.currentPlayer = 'Black'
           state.selectedPiece = null
           state.desiredMove = null
         }
         if(square > 55 && square <= 63 && pieceDetails.type === '001') {
           state.board[square] = piece.payload
           state.promotion = false
-          state.currentPlayer = 'Black'
+          state.currentPlayer = 'White'
           state.selectedPiece = null
           state.desiredMove = null
         }
