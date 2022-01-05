@@ -44,7 +44,7 @@ export class Piece {
             return !enemyMoves.includes(kingLocation)
                   
         })
-
+        
         // adds castling moves (if available) to trueLegalMoves array
         if(selectedPiece === this.King + (isCurrentPlayerWhite ? this.White : this.Black)){
             _.castleMovesAvailable(board, isCurrentPlayerWhite, enemyMoves, canCastle).forEach((move) =>{
