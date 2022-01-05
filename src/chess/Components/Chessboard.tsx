@@ -67,11 +67,11 @@ const Chessboard = () => {
                 if(selectedPiece !== null && square !== selectedPieceLocation) {
                   dispatch(selectPiece(square))
                 }
-              } else {
                 if(selectedPiece !== null) {
                   dispatch(humanMoveHandler(square))
                 }
               }
+                
               //if(pieceDetails.color === humanColor && promotionStatus !== true) {
               //  if(selectedPiece === null) {
               //    dispatch(selectPiece(square))

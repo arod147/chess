@@ -80,10 +80,10 @@ export const humanMoveHandler = (location: number) : AppThunk => {
 
 export const cpuMoveHandler = () : AppThunk => {
    return (dispatch: AppDispatch, getState) => {
-       const myCpuPieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
+      const myCpuPieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
 
-       const myRandomPiece = myCpuPieces[Math.floor(Math.random() * myCpuPieces.length)]
-       if(myRandomPiece !== undefined) {
+      const myRandomPiece = myCpuPieces[Math.floor(Math.random() * myCpuPieces.length)]
+      if(myRandomPiece !== undefined) {
         dispatch(setCpuMove(
           {
           piece: myRandomPiece.type, 
@@ -95,10 +95,14 @@ export const cpuMoveHandler = () : AppThunk => {
 
         const opponentMoveablePieces = getAllPieceDetails(getState(), getState().chess.humanColor)
         dispatch(updateCheckStatus())
-        if(opponentMoveablePieces.length < 1) {
+
+        if(opponentMoveablePieces.length < 1 && getState().chess.check === true ) {
           dispatch(endGame())
         }
-       }
+        if(opponentMoveablePieces.length < 1 && getState().chess.check !== true ) {
+          dispatch(drawGame())
+        }
+      }
    }
 }
 
@@ -191,7 +195,8 @@ export const chessSlice = createSlice({
         state.board[state.desiredMove] = state.selectedPiece
         state.board[state.selectedPieceLocation] = new Piece().None
         state.lastMove = state.desiredMove
-
+        //no pawns and either player only has bishop or knight 
+        //Player can move but not in check
         if(state.canCastle.includes(true)){
           updateCastleStates(state.board, state.currentPlayer === 'White', state.canCastle)
       }
@@ -262,6 +267,9 @@ export const chessSlice = createSlice({
     endGame: (state) => {
       state.gameStatus = 'Ended'
     },
+    drawGame: (state) => {
+      state.gameStatus = 'Draw'
+    },
     resetGame: () => {
       return initialState
     }
@@ -278,6 +286,7 @@ export const {
   promotePawn, 
   updateCheckStatus, 
   endGame,
+  drawGame,
   resetGame
 } = chessSlice.actions;
 
