@@ -5,8 +5,8 @@ const PreGameMenu = () => {
     const dispatch = useAppDispatch()
     const gameStatus = useAppSelector(selectGameStatus)
     return (
-        <div id='menu' style={{display: gameStatus === null ? 'block' : 'none'}}>
-            <h1>Who would you like to play as white or black?</h1>
+        <div className='menu' style={{display: gameStatus === null ? 'block' : 'none'}}>
+            <h2>Who would you like to play as white or black?</h2>
             <button onClick={() =>{dispatch(setPlayerColors('White'))}}>White</button>
             <button onClick={() =>{dispatch(setPlayerColors('Black'))}}>Black</button>
         </div>

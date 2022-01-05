@@ -9,18 +9,18 @@ const EndScreen = () => {
     const dispatch = useAppDispatch()
     const gameStatus = useAppSelector(selectGameStatus)
     const playerColor = useAppSelector(selectCurrentPlayer)
-    let showMessage: string = 'none'
+    let displayeStyle: string = 'none'
     const message = () => {
         if(gameStatus === 'Ended' && playerColor === 'White') {
-            showMessage = 'Block'
+            displayeStyle = 'Block'
             return <h1>Black player wins! CheckMate</h1>
         }
         if(gameStatus === 'Ended' && playerColor === 'Black') {
-            showMessage = 'Block'
+            displayeStyle = 'Block'
             return <h1>White player wins! CheckMate</h1>
         }
         if(gameStatus === 'Draw') {
-            showMessage = 'Block'
+            displayeStyle = 'Block'
             return <h1>Draw!</h1>
         }
     }
@@ -28,7 +28,7 @@ const EndScreen = () => {
     const endMessage = message()
 
     return (
-        <div style={{display: showMessage}}>
+        <div className='menu' style={{display: displayeStyle}}>
             {endMessage}
             <h2>Would you like to play again?</h2>
             <button onClick={() => dispatch(resetGame())}>Yes!</button>

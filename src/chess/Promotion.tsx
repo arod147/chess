@@ -23,9 +23,12 @@ const Promotion = () => {
 
     const promotionContainer = getPromoPieces()
     return (
-            <div id='promoContainer' style={{display: promotion === true ? 'flex' : 'none'}}>
+        <div id='promoBox' style={{display: promotion === true ? 'flex' : 'none'}}>
+            <h3>Which piece would you like to promote to?</h3>
+            <div id='promoContainer'>
                 {promotionContainer}
             </div>
+        </div>
         
     )
 }

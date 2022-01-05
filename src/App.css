@@ -1,6 +1,6 @@
 .App {
-    display: flex;
     padding: 30px;
+    display: flex;
 }
 
 .flipBoard {
@@ -76,23 +76,50 @@
     background-color: lightcoral;
 }
 
+.menu {
+    text-align: center;
+    position: fixed;
+    top: 20%;
+    left: 60%;
+    transform: translate(-50%, -50%);
+    background-color: rgb(231, 233, 99);
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.menu button {
+    width: 200px;
+    height: 50px;
+    background-color: antiquewhite;
+    transition: 300ms;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin: 10px;
+}
+
+.menu button:hover {
+    background-color: rgb(172, 153, 128);
+}
+
+#promoBox {
+    margin-left: 40px;
+    flex-direction: column;
+}
+
 #promoContainer {
-    width: 560px;
-    height: 70px;
+    width: 350px;
+    height: 75px;
+    display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    border: 1px red solid;
-    background-color: antiquewhite;
-    position: fixed;
-    top: 200px;
-    left: 30px;
+    border-radius: 5px;
+    background-color: rgb(208, 163, 106);
 }
 
 #promoContainer div {
     width: 70px;
     height: 70px;
-    display: flex;
 }
 
 
