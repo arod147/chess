@@ -104,59 +104,21 @@ export const cpuMoveHandler = () : AppThunk => {
    }
 }
 
-//will be assigned setInterval to wait for the player move, in global scope to be manipulated later
-let currentInterval: NodeJS.Timeout 
-
-export const moveFinder = createAsyncThunk<
-//our promise will return a boolean
-  boolean, number, {
-    state: RootState
-  }>
-  ('moveFinder', 
-    async (location, thunkApi) =>  {
-      thunkApi.dispatch(selectPiece(location))
-      
-      const waitingForMove = new Promise<boolean>((resolve, reject) => {
-        if(thunkApi.getState().chess.selectedPiece != null) {
-          clearInterval(currentInterval)
-          currentInterval = setInterval(() => {
-            console.log('waiting for move')
-            if(thunkApi.getState().chess.desiredMove != null ) {
-              resolve(true)
-            }
-          }, 300)
-        } else {
-          console.log('Invalid piece selected')
-          reject(false)
-        }
+export const moveHandler = (location: number) : AppThunk => {
+  return (dispatch: AppDispatch, getState) => {
+    dispatch(getPlayerSelectedMove(location))
+    dispatch(movePiece())
+    const pieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
+    const myPiecesWithMoves = pieces.filter((object) => {
+      return object.moves.length > 0
       })
-      const move = await waitingForMove
-      return move
-    }
-  )
-
-export const moveHandler = (location: number) : AppThunk =>
-  async (dispatch: AppDispatch, getState) => {
-    const response = await dispatch(moveFinder(location))
-    if(response.meta.requestStatus === 'fulfilled') {
-      clearInterval(currentInterval)
-      console.log('Promise returned true')
-      dispatch(movePiece())
-      const pieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
-        const myPiecesWithMoves = pieces.filter((object) => {
-        return object.moves.length > 0
-        })
-        dispatch(updateCheck())
-        if(myPiecesWithMoves.length < 1) {
-          dispatch(endGame())
-        }
-      return true
-    } 
-    if(response.meta.requestStatus === 'rejected') {
-      console.log('Promise returned false')
-      clearInterval(currentInterval)
-    }
+      dispatch(updateCheck())
+      if(myPiecesWithMoves.length < 1) {
+        dispatch(endGame())
+      }
   }
+}
+  
 
 export const chessSlice = createSlice({
   name: 'chess',
@@ -267,6 +229,7 @@ export const chessSlice = createSlice({
       return initialState
     },
     getPlayerSelectedMove: (state, location: PayloadAction<number>) => {
+      console.log(location.payload)
       state.possibleMoves.map(move => {
         if(move === location.payload) {
           state.desiredMove = location.payload

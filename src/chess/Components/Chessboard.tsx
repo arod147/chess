@@ -11,7 +11,8 @@ import {
     selectPossibleMoves,
     getPieceTypeAndColor,
     selectHumanColor,
-    selectCpuColor, } from '../chessSlice';
+    selectCpuColor,
+    selectPiece, } from '../chessSlice';
 import Tile from './Tiles';
 import Piece from './Piece';
 
@@ -64,17 +65,14 @@ const Chessboard = () => {
             onClick={() =>{
               if(pieceDetails.color === humanColor) {
                 if(selectedPiece === null ) {
-                  dispatch(moveHandler(square))
+                  dispatch(selectPiece(square))
                 }
                 if(selectedPiece !== null && square !== selectedPieceLocation) {
-                  dispatch(moveHandler(square))
-                }
-                if(selectedPiece !== null) {
-                  dispatch(getPlayerSelectedMove(square))
+                  dispatch(selectPiece(square))
                 }
               } else {
                 if(selectedPiece !== null) {
-                  dispatch(getPlayerSelectedMove(square))
+                  dispatch(moveHandler(square))
                 }
               }
             }}>
@@ -85,7 +83,7 @@ const Chessboard = () => {
       return <Tile key={square} tileColor={backGroundColor}
       onClick={() =>{
         if(selectedPiece !== null){
-          dispatch(getPlayerSelectedMove(square))
+          dispatch(moveHandler(square))
         }
       }} 
       >
