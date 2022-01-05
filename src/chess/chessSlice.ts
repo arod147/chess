@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState, AppDispatch, AppThunk } from '../app/store';
 import { Piece } from './pieceClass';
-import {castle, enPassant, updateCastleStates} from './pieceMethods'
+import {castle, updateCastleStates} from './pieceMethods'
 
 export interface State {
   board: number[]
@@ -99,17 +99,10 @@ export const humanMoveHandler = (location: number) : AppThunk => {
 
 export const cpuMoveHandler = () : AppThunk => {
    return (dispatch: AppDispatch, getState) => {
-<<<<<<< HEAD
       const myCpuPieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
       
       const myRandomPiece = myCpuPieces[Math.floor(Math.random() * myCpuPieces.length)]
       if(myRandomPiece !== undefined) {
-=======
-       const myCpuPieces = getAllPieceDetails(getState(), getState().chess.cpuColor)
-
-       const myRandomPiece = myCpuPieces[Math.floor(Math.random() * myCpuPieces.length)]
-       if(myRandomPiece !== undefined) {
->>>>>>> 2833a62f411530839e5a352155a2e655dc62a1aa
         dispatch(setCpuMove(
           {
           piece: myRandomPiece.type, 
@@ -118,13 +111,15 @@ export const cpuMoveHandler = () : AppThunk => {
         }))
 
         dispatch(movePiece())
-
+        if(getState().chess.promotion ===true) {
+          //dispatch(promotePawn(promoPiece))
+        }
         const opponentMoveablePieces = getAllPieceDetails(getState(), getState().chess.humanColor)
         dispatch(updateCheckStatus())
-        if(opponentMoveablePieces.length < 1) {
+
+        if(opponentMoveablePieces.length < 1 && getState().chess.check === true ) {
           dispatch(endGame())
         }
-<<<<<<< HEAD
         if(opponentMoveablePieces.length < 1 && getState().chess.check !== true ) {
           dispatch(drawGame())
         }
@@ -143,9 +138,6 @@ export const cpuMoveHandler = () : AppThunk => {
           }
         }
       }
-=======
-       }
->>>>>>> 2833a62f411530839e5a352155a2e655dc62a1aa
    }
 }
 
@@ -220,11 +212,12 @@ export const chessSlice = createSlice({
       if(state.desiredMove !== null && state.selectedPiece !== null && state.selectedPieceLocation !== null) {
         const piece = getPieceTypeAndColor(state.selectedPiece)
         const king = '110'
-        const pawn = '001'
-
         // handles enPassant
-        if(state.lastMove === state.desiredMove + (state.currentPlayer === 'White' ? 8 : -8) && piece.type === pawn){
-          enPassant(state.board, piece.color === 'White', state.lastMove)
+        // checks if friendly pawn moved to space behind last-moved enemy pawn
+        if(state.lastMove === state.desiredMove + (state.currentPlayer === 'White' ? 8 : -8)
+        && state.selectedPiece === new Piece().Pawn + (state.currentPlayer === 'White' ? new Piece().White
+        : new Piece().Black)){
+          state.board[state.lastMove] = new Piece().None
         }
 
         //handles castling
@@ -237,7 +230,8 @@ export const chessSlice = createSlice({
         state.board[state.desiredMove] = state.selectedPiece
         state.board[state.selectedPieceLocation] = new Piece().None
         state.lastMove = state.desiredMove
-
+        //no pawns and either player only has bishop or knight 
+        //Player can move but not in check
         if(state.canCastle.includes(true)){
           updateCastleStates(state.board, state.currentPlayer === 'White', state.canCastle)
       }
@@ -308,6 +302,9 @@ export const chessSlice = createSlice({
     endGame: (state) => {
       state.gameStatus = 'Ended'
     },
+    drawGame: (state) => {
+      state.gameStatus = 'Draw'
+    },
     resetGame: () => {
       return initialState
     }
@@ -324,6 +321,7 @@ export const {
   promotePawn, 
   updateCheckStatus, 
   endGame,
+  drawGame,
   resetGame
 } = chessSlice.actions;
 
