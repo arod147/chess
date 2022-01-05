@@ -181,7 +181,7 @@ export const chessSlice = createSlice({
         }
 
         //handles castling
-        if(piece.type === '110'){
+        if(piece.type === '110'){ // 110 = king
           if (state.desiredMove === state.selectedPieceLocation + 2 || state.desiredMove === state.selectedPieceLocation-2){
             castle(state.board, state.selectedPiece, state.desiredMove, state.canCastle)
           }
