@@ -56,20 +56,16 @@
     background-size: 78px;
 }
 
-.highlight {
-    background-color: blue;
-}
-
 .tan {
-    background-color: tan;
+    background-color: rgb(204, 174, 134);
 }
 
 .brown {
-    background-color: brown;
+    background-color: rgb(136, 84, 36);
 }
 
 .highlight {
-    background-color: blue;
+    background-color: rgb(44, 44, 253);
 }
 
 .check {
