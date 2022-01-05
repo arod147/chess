@@ -25,9 +25,9 @@ function App() {
     }, [gameStatus, dispatch])
 
   useEffect(() => {
-    //if(playerTurn === cpuColor && gameStatus === 'InProgress') {
-      //setTimeout(() => {dispatch(cpuMoveHandler())}, 300)
-    //}
+    if(playerTurn === cpuColor && gameStatus === 'InProgress') {
+      setTimeout(() => {dispatch(cpuMoveHandler())}, 300)
+    }
   }, [playerTurn, gameStatus, dispatch, cpuColor])  
     
   return (

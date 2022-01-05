@@ -112,7 +112,14 @@ export const cpuMoveHandler = () : AppThunk => {
 
         dispatch(movePiece())
         if(getState().chess.promotion ===true) {
-          //dispatch(promotePawn(promoPiece))
+          let promoPiece: number = 0
+          if(getState().chess.cpuColor === 'White') {
+            promoPiece = 13
+          }
+          if(getState().chess.cpuColor === 'Black') {
+            promoPiece = 21
+          }
+          dispatch(promotePawn(promoPiece))
         }
         const opponentMoveablePieces = getAllPieceDetails(getState(), getState().chess.humanColor)
         dispatch(updateCheckStatus())
